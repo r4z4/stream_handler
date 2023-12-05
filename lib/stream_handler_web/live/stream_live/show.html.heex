@@ -1,0 +1,28 @@
+<.header>
+  Stream <%= @stream.id %>
+  <:subtitle>This is a stream record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/stream/#{@stream}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit stream</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Id"><%= @stream.id %></:item>
+  <:item title="Desc"><%= @stream.desc %></:item>
+  <:item title="Data"><%= @stream.data %></:item>
+</.list>
+
+<.back navigate={~p"/stream"}>Back to stream</.back>
+
+<.modal :if={@live_action == :edit} id="stream-modal" show on_cancel={JS.patch(~p"/stream/#{@stream}")}>
+  <.live_component
+    module={StreamHandlerWeb.StreamLive.FormComponent}
+    id={@stream.id}
+    title={@page_title}
+    action={@live_action}
+    stream={@stream}
+    patch={~p"/stream/#{@stream}"}
+  />
+</.modal>
