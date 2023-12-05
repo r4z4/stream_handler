@@ -34,7 +34,6 @@ defmodule StreamHandler.Streams.Producer do
   end
 
   # {:ok, contents} = File.read("haiku.txt")
-
   @impl true
   def init(state) do
     IO.inspect state, label: "init"
