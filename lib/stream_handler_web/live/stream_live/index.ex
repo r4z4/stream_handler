@@ -93,7 +93,6 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       _ ->
         IO.puts "No Service Casted"
     end
-
     {:noreply, socket}
   end
 
