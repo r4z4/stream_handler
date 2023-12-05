@@ -4,7 +4,8 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   alias StreamHandler.Streams
   alias StreamHandler.Streams.Stream
 
-  @topic "test_topic"
+  @topic_3 "test_3"
+  @topic_4 "test_4"
 
   @impl true
   def handle_call(:ping, _from, state) do
@@ -18,11 +19,14 @@ defmodule StreamHandlerWeb.StreamLive.Index do
 
   def mount(_params, _session, socket) do
     IO.puts "Subscribing"
-    StreamHandlerWeb.Endpoint.subscribe(@topic)
+    StreamHandlerWeb.Endpoint.subscribe(@topic_3)
+    StreamHandlerWeb.Endpoint.subscribe(@topic_4)
     {:ok,
       socket
       |> assign(:text, "Start")
       |> assign(:number, 0)
+      |> assign(:text_3, "Number Three")
+      |> assign(:number_3, 3)
     }
   end
 
@@ -54,7 +58,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     case params["id"] do
       "1" ->
         IO.puts "Service #1 Casted"
-        StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic, "test_message", [])
+        # StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic_4, "test_message", [])
         GenServer.cast :consumer_1, {:increment, "Hey #1"}
         GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 1}}
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 1}}
@@ -69,11 +73,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 2}}
       "3" ->
         IO.puts "Service #3 Casted"
-        Phoenix.PubSub.broadcast(
-          StreamHandler.PubSub,
-          @topic,
-          %{topic: @topic, payload: %{status: :complete, text: "Service #3 has completed."}}
-        )
+        GenServer.cast :consumer_3, {:custom_event, "Custom Event String"}
         GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 3}}
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 3}}
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 3}}
@@ -83,8 +83,8 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         IO.inspect(socket)
         Phoenix.PubSub.broadcast(
           StreamHandler.PubSub,
-          @topic,
-          %{topic: @topic, payload: %{status: :complete, text: "Service #4 has completed."}}
+          @topic_4,
+          %{topic: @topic_4, payload: %{status: :complete, text: "Service #4 has completed."}}
         )
         GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 4}}
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 4}}
@@ -111,13 +111,24 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   end
 
   @impl true
-  def handle_info(%{topic: @topic, payload: msg}, socket) do
+  def handle_info(%{topic: @topic_4, payload: msg}, socket) do
     IO.inspect(socket)
     IO.puts "HANDLE BROADCAST FOR #{msg[:status]}"
     {:noreply,
       socket
       |> assign(:text, msg[:text])
       |> assign(:number, 5)
+    }
+  end
+
+  @impl true
+  def handle_info(%{topic: @topic_3, payload: msg}, socket) do
+    IO.inspect(socket)
+    IO.puts "HANDLE BROADCAST 3 FOR #{msg[:text]}"
+    {:noreply,
+      socket
+      |> assign(:text_3, msg[:text])
+      |> assign(:number_3, 30)
     }
   end
 end
