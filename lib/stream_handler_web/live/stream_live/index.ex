@@ -2,8 +2,10 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   use StreamHandlerWeb, :live_view
 
   alias StreamHandler.Streams
-  alias StreamHandler.Streams.Stream
+  # alias StreamHandler.Streams.Stream
 
+  @slugs "slugs"
+  @activities "activities"
   @topic_3 "test_3"
   @topic_4 "test_4"
 
@@ -19,6 +21,8 @@ defmodule StreamHandlerWeb.StreamLive.Index do
 
   def mount(_params, _session, socket) do
     IO.puts "Subscribing"
+    StreamHandlerWeb.Endpoint.subscribe(@slugs)
+    StreamHandlerWeb.Endpoint.subscribe(@activities)
     StreamHandlerWeb.Endpoint.subscribe(@topic_3)
     StreamHandlerWeb.Endpoint.subscribe(@topic_4)
     {:ok,
@@ -27,6 +31,10 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       |> assign(:number, 0)
       |> assign(:text_3, "Number Three")
       |> assign(:number_3, 3)
+      |> assign(:text_slugs, "Slugs")
+      |> assign(:number_slugs, 1)
+      |> assign(:text_activities, "Activities")
+      |> assign(:number_activities, 75)
     }
   end
 
@@ -59,33 +67,34 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       "1" ->
         IO.puts "Service #1 Casted"
         # StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic_4, "test_message", [])
-        GenServer.cast :consumer_1, {:increment, "Hey #1"}
+        GenServer.cast :consumer_1, {:fetch_resource, :slugs}
         GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 1}}
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 1}}
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 1}}
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 1}}
       "2" ->
         IO.puts "Service #2 Casted"
-        GenServer.cast :consumer_2, {:increment, "Hey #2"}
+        GenServer.cast :consumer_2, {:fetch_resource, :increment}
         GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 2}}
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 2}}
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 2}}
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 2}}
       "3" ->
         IO.puts "Service #3 Casted"
-        GenServer.cast :consumer_3, {:custom_event, "Custom Event String"}
+        GenServer.cast :consumer_3, {:fetch_resource, :custom_event}
         GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 3}}
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 3}}
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 3}}
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 3}}
       "4" ->
         IO.puts "Service #4 Casted"
-        IO.inspect(socket)
-        Phoenix.PubSub.broadcast(
-          StreamHandler.PubSub,
-          @topic_4,
-          %{topic: @topic_4, payload: %{status: :complete, text: "Service #4 has completed."}}
-        )
+        # IO.inspect(socket)
+        # Phoenix.PubSub.broadcast(
+        #   StreamHandler.PubSub,
+        #   @topic_4,
+        #   %{topic: @topic_4, payload: %{status: :complete, text: "Service #4 has completed."}}
+        # )
+        GenServer.cast :consumer_4, {:fetch_resource, :activities}
         GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 4}}
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 4}}
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 4}}
@@ -128,6 +137,28 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       socket
       |> assign(:text_3, msg[:text])
       |> assign(:number_3, 30)
+    }
+  end
+
+  @impl true
+  def handle_info(%{topic: @slugs, payload: msg}, socket) do
+    IO.inspect(socket)
+    IO.puts "HANDLE BROADCAST SLUGS FOR #{msg[:text]}"
+    {:noreply,
+      socket
+      |> assign(:text_slugs, msg[:text])
+      |> assign(:number_slugs, 11)
+    }
+  end
+
+  @impl true
+  def handle_info(%{topic: @activities, payload: msg}, socket) do
+    IO.inspect(socket)
+    IO.puts "HANDLE BROADCAST ACTIVITIES FOR #{msg[:text]}"
+    {:noreply,
+      socket
+      |> assign(:text_activities, msg[:text])
+      |> assign(:number_activities, 98)
     }
   end
 end
