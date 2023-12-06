@@ -6,6 +6,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
 
   @slugs "slugs"
   @activities "activities"
+  @aq "aq"
   @topic_3 "test_3"
   @topic_4 "test_4"
 
@@ -22,6 +23,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   def mount(_params, _session, socket) do
     IO.puts "Subscribing"
     StreamHandlerWeb.Endpoint.subscribe(@slugs)
+    StreamHandlerWeb.Endpoint.subscribe(@aq)
     StreamHandlerWeb.Endpoint.subscribe(@activities)
     StreamHandlerWeb.Endpoint.subscribe(@topic_3)
     StreamHandlerWeb.Endpoint.subscribe(@topic_4)
@@ -35,6 +37,8 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       |> assign(:number_slugs, 1)
       |> assign(:text_activities, "Activities")
       |> assign(:number_activities, 75)
+      |> assign(:activities, nil)
+      |> assign(:aq, nil)
     }
   end
 
@@ -99,6 +103,9 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 4}}
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 4}}
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 4}}
+      "5" ->
+        IO.puts "AQ Casted"
+        GenServer.cast :consumer_3, {:fetch_resource, :aq}
       _ ->
         IO.puts "No Service Casted"
     end
@@ -154,11 +161,24 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @impl true
   def handle_info(%{topic: @activities, payload: msg}, socket) do
     IO.inspect(socket)
+    IO.inspect(msg, label: "Msg")
     IO.puts "HANDLE BROADCAST ACTIVITIES FOR #{msg[:text]}"
     {:noreply,
       socket
+      |> assign(:activities, msg)
       |> assign(:text_activities, msg[:text])
       |> assign(:number_activities, 98)
+    }
+  end
+
+  @impl true
+  def handle_info(%{topic: @aq, payload: msg}, socket) do
+    IO.inspect(socket)
+    IO.inspect(msg, label: "Msg")
+    IO.puts "HANDLE BROADCAST ACTIVITIES FOR #{msg[:text]}"
+    {:noreply,
+      socket
+      |> assign(:aq, msg)
     }
   end
 end

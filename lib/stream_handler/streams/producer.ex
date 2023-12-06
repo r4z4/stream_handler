@@ -4,6 +4,7 @@ defmodule StreamHandler.Streams.Producer do
   @time_interval_ms 1000
   @call_interval_ms 7000
   @activities "activities"
+  @aq "aq"
   @topic_3 "test_3"
   @topic_4 "test_4"
   @slugs "slugs"
@@ -70,6 +71,20 @@ defmodule StreamHandler.Streams.Producer do
     body
   end
 
+  defp get_aq() do
+    {:ok, resp} =
+      Finch.build(
+        :get,
+        "https://api.openaq.org/v1/locations?limit=100&page=1&offset=0&sort=desc&radius=1000&city=ARAPAHOE&order_by=lastUpdated&dump_raw=false",
+        [{"Accept", "application/json"}, {"X-API-Key", System.fetch_env!("OPEN_AQ_KEY")}]
+        )
+        |> Finch.request(StreamHandler.Finch)
+
+    IO.inspect(resp, label: "Resp")
+    {:ok, body} = Jason.decode(resp.body)
+    body
+  end
+
   @impl true
   def handle_info(:custom_event, state) do
     IO.puts "Handle Info GOING"
@@ -77,7 +92,7 @@ defmodule StreamHandler.Streams.Producer do
     Phoenix.PubSub.broadcast(
       StreamHandler.PubSub,
       @topic_3,
-      %{topic: @topic_3, payload: %{status: :complete, text: "Custom Event has completed. #{state}"}}
+      %{topic: @topic_3, payload: %{status: :complete, data: state, text: "Custom Event has completed. #{state}"}}
     )
     state = state ++ ["b"]
     {:noreply, state}
@@ -90,7 +105,7 @@ defmodule StreamHandler.Streams.Producer do
     Phoenix.PubSub.broadcast(
       StreamHandler.PubSub,
       @topic_4,
-      %{topic: @topic_4, payload: %{status: :complete, text: "Service #4 has completed. #{state}"}}
+      %{topic: @topic_4, payload: %{status: :complete, data: state, text: "Service #4 has completed. #{state}"}}
     )
     state = state ++ ["a"]
     {:noreply, state}
@@ -107,7 +122,7 @@ defmodule StreamHandler.Streams.Producer do
     Phoenix.PubSub.broadcast(
       StreamHandler.PubSub,
       @slugs,
-      %{topic: @slugs, payload: %{status: :complete, text: "Slugs has completed. #{state}"}}
+      %{topic: @slugs, payload: %{status: :complete, data: state, text: "Slugs has completed. #{state}"}}
     )
     display =
       case Map.fetch(body, "Strings") do
@@ -124,13 +139,20 @@ defmodule StreamHandler.Streams.Producer do
     Process.send_after(self(), :activities, @call_interval_ms)
     IO.puts(Enum.count(state))
 
+    activity =
+      if Enum.count(state) > 0 do
+        state.activity
+      else
+        "None Yet"
+      end
+
     body = get_activities()
     IO.inspect(body, label: "Body")
     # http://apilayer.net/api/live?access_key=#{System.fetch_env!("FOREX_API_KEY")}&currencies=EUR,GBP,CAD,PLN&source=USD&format=1
     Phoenix.PubSub.broadcast(
       StreamHandler.PubSub,
       @activities,
-      %{topic: @activities, payload: %{status: :complete, text: "Activities has completed. #{state}"}}
+      %{topic: @activities, payload: %{status: :complete, data: state, text: "Activities has completed. #{activity}"}}
     )
     activity =
       case Map.fetch(body, "activity") do
@@ -142,9 +164,26 @@ defmodule StreamHandler.Streams.Producer do
         {:ok, str} -> str
         :error -> "No Type"
       end
-    display = [activity, type]
+    display = %{activity: activity, type: type}
     # state = body["Strings"]
     state = display
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info(:aq, state) do
+    Process.send_after(self(), :aq, @call_interval_ms)
+    IO.puts(Enum.count(state))
+
+    body = get_aq()
+    IO.inspect(body, label: "Body")
+    # http://apilayer.net/api/live?access_key=#{System.fetch_env!("FOREX_API_KEY")}&currencies=EUR,GBP,CAD,PLN&source=USD&format=1
+    Phoenix.PubSub.broadcast(
+      StreamHandler.PubSub,
+      @aq,
+      %{topic: @aq, payload: %{status: :complete, data: state, text: "aq has completed. #{state}"}}
+    )
+
     {:noreply, state}
   end
 end
