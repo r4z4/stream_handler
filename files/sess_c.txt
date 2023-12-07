@@ -1,0 +1,34 @@
+Attackers can take measures against Brute Force. 
+They can predict and expose session tokens which ultimately can lead to session hijacking, where the malicious consumer can impersonate the victim and complete transactions from their account.
+
+So to avoid such instances, we use session management so we can adequately secure the session, which helps to provide robust protection against session hijacking.
+
+How to Implement User Session Management
+There are various aspects to implementing proper session management. The following are some of the best practices to mitigate potential compromise.
+
+Set secure/HttpOnly flags on your cookies.
+Generate new session cookies.
+Configure session cookies properly.
+Set Secure/HttpOnly Flags on your Cookies
+Avoid sending delicate traffic and tokens across an unencrypted channel. This can be enforced by establishing the Secure flag, ensuring that data will only be transported over HTTPS.
+
+The HTTP flag should also be arranged for session cookies, as this will prevent client-side JavaScript from accessing it, resulting in session hijacking.
+
+Generate New Session Cookies
+It would be best to always keep in mind that all new session tokens should be generated at every session as soon as a consumer visits the application, verifies the correct credentials, and logs out of their account.
+
+A cookie should expire if the account is inactive for an extended period of time, and you should bind the consumer to re-authenticate. 
+Also, it should apply to changes in state, meaning the cookie should automatically be destroyed when the session transitions from anonymous to authenticated or vice versa.
+
+Configure Session Cookies Properly
+Session tokens should be extended, random, and uncommon. These properties can ensure that an attacker cannot guess or brute force the session token's value. 
+Additionally, the termination on persistent cookies should be set for no longer than 30 minutes, limiting the session fixation and hijacking and we can achieve this by modifying the Expire and Max-Age attributes.
+
+If no content is selected for the Expire or Max-Age attributes, the cookie will not persist in the consumer's browser and is expelled while the tab or browser is closed.
+
+It is also recommended that the scope of domains that can access the session cookie is limited and restrictive. This is controlled by the Domain and Path attributes.
+
+Conclusion
+In this blog, we have tried to explain user session management in an easy-to-grasp language. 
+Typically managing a session starts when consumers verify their identity using a password or another authentication protocol and what best practices we need to follow to make a secure session. 
+Also, we have gained information on how to mitigate the potential risk of session hijacking.

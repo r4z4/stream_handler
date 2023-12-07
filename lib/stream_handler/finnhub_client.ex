@@ -13,7 +13,7 @@ defmodule StreamHandler.FinnhubClient do
 
   @impl true
   def handle_frame({:text, data}, state) do
-    Logger.info("Recieved Finnhub: #{inspect(data)}")
+    Logger.info("Received Finnhub: #{inspect(data)}")
     {:ok, state}
   end
 

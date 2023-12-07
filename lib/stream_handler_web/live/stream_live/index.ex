@@ -12,6 +12,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @aq "aq"
   @topic_3 "test_3"
   @topic_4 "test_4"
+  @reader "reader"
 
   @impl true
   def handle_call(:ping, _from, state) do
@@ -27,6 +28,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     IO.puts "Subscribing"
     StreamHandlerWeb.Endpoint.subscribe(@slugs)
     StreamHandlerWeb.Endpoint.subscribe(@emojis)
+    StreamHandlerWeb.Endpoint.subscribe(@reader)
     StreamHandlerWeb.Endpoint.subscribe("websocket")
 
     StreamHandlerWeb.Endpoint.subscribe(@aq)
@@ -38,6 +40,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       |> assign(:text_slugs, nil)
       |> assign(:number_slugs, 1)
       |> assign(:emoji, nil)
+      |> assign(:reader, nil)
 
       |> stream(:messages, [])
       |> stream(:spreads, [])
@@ -121,6 +124,9 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       "6" ->
         IO.puts "AQ Casted"
         GenServer.cast :consumer_3, {:fetch_resource, :aq}
+      "7" ->
+        IO.puts "Reader Casted"
+        GenServer.cast :reader, {:fetch_resource, :reader}
       _ ->
         IO.puts "No Service Casted"
     end
@@ -204,6 +210,17 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     {:noreply,
       socket
       |> assign(:aq, msg)
+    }
+  end
+
+  @impl true
+  def handle_info(%{topic: @reader, payload: msg}, socket) do
+    IO.inspect(socket)
+    IO.inspect(msg, label: "Msg")
+    IO.puts "HANDLE BROADCAST ACTIVITIES FOR #{msg[:text]}"
+    {:noreply,
+      socket
+      |> assign(:reader, msg)
     }
   end
 

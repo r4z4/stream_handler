@@ -18,7 +18,7 @@ defmodule StreamHandler.Websocket do
     IO.inspect(new_message, label: "NEW MESSAGE HEY")
     case new_message do
       %{"event" => "heartbeat"} -> IO.puts("Heartbeat")
-      %{"connectionID" => conn, "event" => evemt, "status" => status, "version" => version} -> IO.puts("Connection")
+      %{"connectionID" => conn, "event" => event, "status" => status, "version" => version} -> IO.puts("Connection")
       new_message when map_size(new_message) == 6 -> IO.puts("Other 6 Connection")
       _ -> broadcast_it(new_message)
     end
