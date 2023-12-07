@@ -50,7 +50,10 @@ defmodule StreamHandler.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:dotenv_parser, "~> 2.0"}
+      {:dotenv_parser, "~> 2.0"},
+      {:websockex, "~> 0.4.3"},
+      {:logger_file_backend, "~> 0.0.10"},
+      {:stream_data, "~> 0.5"}
     ]
   end
 

@@ -1,75 +1,63 @@
 <.header>
   Listing
 </.header>
+  <div class="grid grid-rows-3 grid-flow-col gap-4 w-full">
 
-    <button
-      type="button"
-      phx-click="service_casted"
-      phx-value-id={1}
-      value={7}
-      class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
-      >Launch Service #1</button>
-
-    <button
-      type="button"
-      phx-click="service_casted"
-      phx-value-id={2}
-      value={7}
-      class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
-      >Launch Service #2</button>
-
-    <button
-      type="button"
-      phx-click="service_casted"
-      phx-value-id={3}
-      value={7}
-      class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
-      >Launch Service #3</button>
-
-    <button
-      type="button"
-      phx-click="service_casted"
-      phx-value-id={4}
-      value={7}
-      class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
-      >Boredom Idea Machine</button>
-
-    <button
-      type="button"
-      phx-click="service_casted"
-      phx-value-id={5}
-      value={7}
-      class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
-      >Air Quality</button>
-
-    <div class="test_topic">
-      Status: <span><%= @text %></span>
+    <div class="border-black border-4 p-8">
+      <StreamHandlerWeb.DashboardComponents.slugs_card text_slugs={@text_slugs} number_slugs={@number_slugs} />
     </div>
 
-    <div id="consumer_1"><%= @number %></div>
-    
-    <div class="test_topic">
+    <div class="border-black border-4 p-8">
+      <StreamHandlerWeb.DashboardComponents.emojis_card emoji={@emoji} />
+    </div>
+
+    <div class="border-black border-4 p-8">
+      <StreamHandlerWeb.DashboardComponents.activities_card activities={@activities} />
+    </div>
+
+    <div class="border-black border-4 p-8">
       Status: <span><%= @text_3 %></span>
+      Number: <%= @number_3 %>
     </div>
-    
-    <div id="consumer_2"><%= @number_3 %></div>
 
-    <div class="test_topic">
-      Status: <span><%= @text_slugs %></span>
+    <div class="border-black border-4 p-8">
+      <p>Test</p>
+      <StreamHandlerWeb.SharedComponents.button_card name="Warsaw"/>
     </div>
-    
-    <div id="consumer_2"><%= @number_slugs %></div>
-
-    <div class="test_topic">
+  
+    <div class="border-black border-4 p-8">
       Status: <span><%= @text_activities %></span>
+      Activities Number: <%= @number_activities %>
+    </div>
+
+    <div class="border-black border-4 p-8">
+      <p>Test</p>
+      <StreamHandlerWeb.SharedComponents.display_card name="Warsaw"/>
+    </div>
+
+    <div class="border-black border-4 p-8">
+      <p>Test</p>
+      <StreamHandlerWeb.SharedComponents.display_card name="Warsaw"/>
     </div>
     
-    <div id="consumer_2"><%= @number_activities %></div>
-
-    <div class="test_topic">
-      <%= if @activities && Enum.count(@activities.data) > 0 do %>
-        <%= StreamHandlerWeb.TemplateHelpers.type_icon(@activities.data.type) %>
-        Type: <span><%= @activities.data.type %></span>
-        Activity: <span><%= @activities.data.activity %></span>
-      <% end %>
+    <div class="border-black border-4 p-8">
+      <p>Test</p>
+      <StreamHandlerWeb.SharedComponents.display_card name="Warsaw"/>
     </div>
+
+  </div>
+
+  <div>
+    <h3>Kraken</h3>
+    <div id="messages" phx-update="stream">
+      <div :for={{dom_id, message} <- @streams.messages} id={dom_id}>
+        <p><%= message.id %> -> <%= message.data["c"] %></p>
+      </div>
+    </div>
+
+    <div id="spreads" phx-update="stream">
+      <div :for={{dom_id, message} <- @streams.spreads} id={dom_id}>
+        <p><%= message.id %> -> <%= message.data %></p>
+      </div>
+    </div>
+  </div>

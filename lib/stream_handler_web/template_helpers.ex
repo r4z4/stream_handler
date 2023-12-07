@@ -5,6 +5,7 @@ defmodule StreamHandlerWeb.TemplateHelpers do
       "charity" -> "🎁"
       "recreational" -> "⚽"
       "social" -> "🥳"
+      "education" -> "📚"
       _ -> "❓"
     end
   end

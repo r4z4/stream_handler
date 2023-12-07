@@ -7,11 +7,16 @@ defmodule StreamHandler.Application do
 
   @impl true
   def start(_type, _args) do
+    # # Listen for our stream heavy app, the repo module, and any type of queries
+    # :ok = :telemetry.attach("sh-repo-handler", [:stream_heavy, :repo, :query], &StreamHeavy.Telemetry.handle_event/4, %{})
+    # :ok = :telemetry.attach("ecto-logger", [:stream_heavy, :repo, :query], &StreamHeavy.EctoLogger.handle_event/4, %{})
     children = [
       # Start the Telemetry supervisor
       StreamHandlerWeb.Telemetry,
       # Start the Ecto repository
       StreamHandler.Repo,
+      # StreamHandler.FinnhubClient,
+      StreamHandler.Websocket,
       # Start the PubSub system
       {Phoenix.PubSub, name: StreamHandler.PubSub},
       # Start Finch

@@ -2,9 +2,12 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   use StreamHandlerWeb, :live_view
 
   alias StreamHandler.Streams
+
+  embed_templates "dashboard_html/*"
   # alias StreamHandler.Streams.Stream
 
   @slugs "slugs"
+  @emojis "emojis"
   @activities "activities"
   @aq "aq"
   @topic_3 "test_3"
@@ -23,18 +26,27 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   def mount(_params, _session, socket) do
     IO.puts "Subscribing"
     StreamHandlerWeb.Endpoint.subscribe(@slugs)
+    StreamHandlerWeb.Endpoint.subscribe(@emojis)
+    StreamHandlerWeb.Endpoint.subscribe("websocket")
+
     StreamHandlerWeb.Endpoint.subscribe(@aq)
     StreamHandlerWeb.Endpoint.subscribe(@activities)
     StreamHandlerWeb.Endpoint.subscribe(@topic_3)
     StreamHandlerWeb.Endpoint.subscribe(@topic_4)
     {:ok,
       socket
+      |> assign(:text_slugs, nil)
+      |> assign(:number_slugs, 1)
+      |> assign(:emoji, nil)
+
+      |> stream(:messages, [])
+      |> stream(:spreads, [])
+      |> assign(:message, '')
+
       |> assign(:text, "Start")
       |> assign(:number, 0)
       |> assign(:text_3, "Number Three")
       |> assign(:number_3, 3)
-      |> assign(:text_slugs, "Slugs")
-      |> assign(:number_slugs, 1)
       |> assign(:text_activities, "Activities")
       |> assign(:number_activities, 75)
       |> assign(:activities, nil)
@@ -78,19 +90,22 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 1}}
       "2" ->
         IO.puts "Service #2 Casted"
+        GenServer.cast :consumer_2, {:fetch_resource, :emojis}
+      "3" ->
+        IO.puts "Service #2 Casted"
         GenServer.cast :consumer_2, {:fetch_resource, :increment}
         GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 2}}
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 2}}
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 2}}
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 2}}
-      "3" ->
+      "4" ->
         IO.puts "Service #3 Casted"
         GenServer.cast :consumer_3, {:fetch_resource, :custom_event}
         GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 3}}
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 3}}
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 3}}
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 3}}
-      "4" ->
+      "5" ->
         IO.puts "Service #4 Casted"
         # IO.inspect(socket)
         # Phoenix.PubSub.broadcast(
@@ -103,7 +118,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 4}}
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 4}}
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 4}}
-      "5" ->
+      "6" ->
         IO.puts "AQ Casted"
         GenServer.cast :consumer_3, {:fetch_resource, :aq}
       _ ->
@@ -153,8 +168,18 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     IO.puts "HANDLE BROADCAST SLUGS FOR #{msg[:text]}"
     {:noreply,
       socket
-      |> assign(:text_slugs, msg[:text])
+      |> assign(:text_slugs, msg[:data])
       |> assign(:number_slugs, 11)
+    }
+  end
+
+  @impl true
+  def handle_info(%{topic: @emojis, payload: msg}, socket) do
+    IO.inspect(socket)
+    IO.puts "HANDLE BROADCAST SLUGS FOR #{msg[:text]}"
+    {:noreply,
+      socket
+      |> assign(:emoji, msg[:data])
     }
   end
 
@@ -180,5 +205,35 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       socket
       |> assign(:aq, msg)
     }
+  end
+
+  @impl true
+  def handle_info(%{event: "new_message", payload: new_message}, socket) do
+    # updated_messages = socket.assigns[:messages] ++ [new_message]
+    IO.inspect(socket, label: "Socket")
+    IO.inspect(new_message, label: "New Message")
+    case new_message do
+        "{\"event\":\"heartbeat\"}" ->
+            IO.puts "Kraken Heartbeat"
+            {:noreply, socket}
+        %{"event" => "heartbeat"} ->
+            IO.puts "Kraken Heartbeat Map"
+            {:noreply, socket}
+        _ ->
+            new_message = %{id: List.first(new_message), data: Kernel.elem(List.pop_at(new_message, 1), 0)}
+            IO.inspect(new_message, label: "The New Message!!")
+            {:noreply,
+                socket
+                |> stream_insert(:messages, new_message)}
+    end
+  end
+
+  @impl true
+  def handle_info(%{event: "new_spread", payload: new_message}, socket) do
+    IO.inspect(new_message, label: "New Spread MEssage")
+    new_message = %{id: List.first(new_message), data: Kernel.elem(List.pop_at(new_message, 1), 0)}
+    {:noreply,
+        socket
+        |> stream_insert(:spreads, new_message)}
   end
 end

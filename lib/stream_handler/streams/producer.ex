@@ -5,6 +5,7 @@ defmodule StreamHandler.Streams.Producer do
   @call_interval_ms 7000
   @activities "activities"
   @aq "aq"
+  @emojis "emojis"
   @topic_3 "test_3"
   @topic_4 "test_4"
   @slugs "slugs"
@@ -78,6 +79,16 @@ defmodule StreamHandler.Streams.Producer do
         "https://api.openaq.org/v1/locations?limit=100&page=1&offset=0&sort=desc&radius=1000&city=ARAPAHOE&order_by=lastUpdated&dump_raw=false",
         [{"Accept", "application/json"}, {"X-API-Key", System.fetch_env!("OPEN_AQ_KEY")}]
         )
+        |> Finch.request(StreamHandler.Finch)
+
+    IO.inspect(resp, label: "Resp")
+    {:ok, body} = Jason.decode(resp.body)
+    body
+  end
+
+  defp get_emojis() do
+    {:ok, resp} =
+      Finch.build(:get, "https://emojihub.yurace.pro/api/random")
         |> Finch.request(StreamHandler.Finch)
 
     IO.inspect(resp, label: "Resp")
@@ -183,6 +194,52 @@ defmodule StreamHandler.Streams.Producer do
       @aq,
       %{topic: @aq, payload: %{status: :complete, data: state, text: "aq has completed. #{state}"}}
     )
+
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info(:emojis, state) do
+    Process.send_after(self(), :emojis, @call_interval_ms)
+    IO.puts(Enum.count(state))
+
+    body = get_emojis()
+    IO.inspect(body, label: "Body")
+    # http://apilayer.net/api/live?access_key=#{System.fetch_env!("FOREX_API_KEY")}&currencies=EUR,GBP,CAD,PLN&source=USD&format=1
+    Phoenix.PubSub.broadcast(
+      StreamHandler.PubSub,
+      @emojis,
+      %{topic: @emojis, payload: %{status: :complete, data: state, text: "Emojis has completed"}}
+    )
+    name =
+      case Map.fetch(body, "name") do
+        {:ok, str} -> str
+        :error -> "No Name"
+      end
+    category =
+      case Map.fetch(body, "category") do
+        {:ok, str} -> str
+        :error -> "No Category"
+      end
+    group =
+      case Map.fetch(body, "group") do
+        {:ok, str} -> str
+        :error -> "No Group"
+      end
+    unicode =
+      case Map.fetch(body, "unicode") do
+        {:ok, list} -> list
+        :error -> "No Unicode"
+      end
+    # htmlCode =
+    #   case Map.fetch(body, "htmlCode") do
+    #     {:ok, list} -> list
+    #     :error -> "No Type"
+    #   end
+    display = %{name: name, category: category, group: group, unicode: unicode}
+    # state = body["Strings"]
+    state = display
+    {:noreply, state}
 
     {:noreply, state}
   end
