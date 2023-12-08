@@ -41,4 +41,14 @@ defmodule StreamHandlerWeb.DashboardComponents do
       <% end %>
     """
   end
+
+  def reader_card(assigns) do
+    ~H"""
+      <h4>Reader</h4>
+      <p>Status: <%= if @reader && Enum.count(@reader) > 0 do %><span><%= @reader.status %></span><% end %></p>
+      <%= if @reader && Enum.count(@reader) > 0 do %>
+          <p><%= @reader.string %></p>
+      <% end %>
+    """
+  end
 end

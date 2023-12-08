@@ -42,14 +42,28 @@ defmodule StreamHandler.Streams.Reader do
     )
   end
 
+  defp publish_str(str) do
+    Phoenix.PubSub.broadcast(
+      StreamHandler.PubSub,
+      @reader,
+      %{topic: @reader, payload: %{status: :complete, string: str}}
+    )
+  end
+
   @impl true
   def handle_info(:reader, state) do
     IO.puts "Handle Info GOING"
-    File.stream!("./files/sess_c.txt")
-      |> Stream.map(&String.trim/1)
-      |> Stream.with_index
-      |> Stream.map(fn ({line, index}) -> publish({line, index}) end)
-      |> Stream.run
+    files = Path.wildcard("./files/poems/*")
+    file = Enum.random(files)
+    {:ok, str} = File.read(file)
+    new_str = String.replace(str, "\n", "<br />")
+    html = Phoenix.HTML.raw("<div>#{new_str}</div>")
+    publish_str(html)
+    # File.stream!(file)
+    #   |> Stream.map(&String.trim/1)
+    #   |> Stream.with_index
+    #   |> Stream.map(fn ({line, index}) -> publish({line, index}) end)
+    #   |> Stream.run
     Process.send_after(self(), :reader, @time_interval_ms)
     # state = state ++ ["b"]
     {:noreply, state}
