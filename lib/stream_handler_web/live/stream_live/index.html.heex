@@ -4,11 +4,11 @@
   <div class="grid grid-cols-3 gap-2 w-full">
 
     <div class="h-56 border-black border-4 p-8">
-      <StreamHandlerWeb.DashboardComponents.slugs_card text_slugs={@text_slugs} number_slugs={@number_slugs} />
+      <StreamHandlerWeb.DashboardComponents.slugs_card slugs={@slugs} />
     </div>
 
     <div class="h-56 border-black border-4 p-8">
-      <StreamHandlerWeb.DashboardComponents.emojis_card emoji={@emoji} />
+      <StreamHandlerWeb.DashboardComponents.emojis_card emojis={@emojis} />
     </div>
 
     <div class="h-56 border-black border-4 p-8">
@@ -21,13 +21,12 @@
     </div>
 
     <div class="h-56 border-black border-4 p-8">
-      <p>Test</p>
       <StreamHandlerWeb.SharedComponents.button_card clicked_map={@clicked_map} />
     </div>
   
     <div class="h-56 border-black border-4 p-8">
-      Status: <span><%= @text_activities %></span>
-      Activities Number: <%= @number_activities %>
+      Status: <span><%= @text_3 %></span>
+      Number: <%= @number_3 %>
     </div>
 
     <div class="h-56 border-black border-4 p-8">

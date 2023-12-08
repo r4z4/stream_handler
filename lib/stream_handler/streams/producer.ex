@@ -30,6 +30,21 @@ defmodule StreamHandler.Streams.Producer do
     {:noreply, state}
   end
 
+  @impl true
+  def handle_cast({:stop_resource, sym}, state) do
+    IO.puts "Cancelling #{sym} Service"
+    case sym do
+      :aq -> Process.cancel_timer(state.reader_ref)
+      :slugs -> Process.cancel_timer(state.slugs_ref)
+      :emojis -> Process.cancel_timer(state.emojis_ref)
+      :activities -> Process.cancel_timer(state.activities_ref)
+      :custom_event -> Process.cancel_timer(state.custom_event_ref)
+      _ -> Process.cancel_timer(state.aq_ref)
+    end
+    # Process.cancel_timer(self(), sym, @time_interval_ms)
+    {:noreply, state}
+  end
+
   # #FIXME just have one cast, then disperse to handle_info
   # @impl true
   # def handle_cast({:custom_event, str}, state) do
@@ -49,7 +64,8 @@ defmodule StreamHandler.Streams.Producer do
   @impl true
   def init(state) do
     IO.inspect state, label: "init"
-    {:ok, state}
+    refs_map = %{slugs_ref: nil, activites_ref: nil, aq_ref: nil, emojis: nil, custom_event: nil}
+    {:ok, refs_map}
   end
 
   defp get_slugs() do
@@ -124,47 +140,30 @@ defmodule StreamHandler.Streams.Producer do
 
   @impl true
   def handle_info(:slugs, state) do
-    Process.send_after(self(), :slugs, @call_interval_ms)
-    IO.puts(Enum.count(state))
-
+    slugs_ref = Process.send_after(self(), :slugs, @call_interval_ms)
     body = get_slugs()
     IO.inspect(body, label: "Body")
-    # http://apilayer.net/api/live?access_key=#{System.fetch_env!("FOREX_API_KEY")}&currencies=EUR,GBP,CAD,PLN&source=USD&format=1
-    Phoenix.PubSub.broadcast(
-      StreamHandler.PubSub,
-      @slugs,
-      %{topic: @slugs, payload: %{status: :complete, data: state, text: "Slugs has completed. #{state}"}}
-    )
     display =
       case Map.fetch(body, "Strings") do
         {:ok, strings} -> strings
         :error -> ["No List"]
       end
-    # state = body["Strings"]
-    state = display
+    # http://apilayer.net/api/live?access_key=#{System.fetch_env!("FOREX_API_KEY")}&currencies=EUR,GBP,CAD,PLN&source=USD&format=1
+    Phoenix.PubSub.broadcast(
+      StreamHandler.PubSub,
+      @slugs,
+      %{topic: @slugs, payload: %{status: :complete, data: display, text: "Slugs has completed. #{display}"}}
+    )
+    state = Map.put(state, :slugs_ref, slugs_ref)
     {:noreply, state}
   end
 
   @impl true
   def handle_info(:activities, state) do
-    Process.send_after(self(), :activities, @call_interval_ms)
-    IO.puts(Enum.count(state))
-
-    activity =
-      if Enum.count(state) > 0 do
-        state.activity
-      else
-        "None Yet"
-      end
-
+    activities_ref = Process.send_after(self(), :activities, @call_interval_ms)
     body = get_activities()
     IO.inspect(body, label: "Body")
     # http://apilayer.net/api/live?access_key=#{System.fetch_env!("FOREX_API_KEY")}&currencies=EUR,GBP,CAD,PLN&source=USD&format=1
-    Phoenix.PubSub.broadcast(
-      StreamHandler.PubSub,
-      @activities,
-      %{topic: @activities, payload: %{status: :complete, data: state, text: "Activities has completed. #{activity}"}}
-    )
     activity =
       case Map.fetch(body, "activity") do
         {:ok, str} -> str
@@ -176,8 +175,12 @@ defmodule StreamHandler.Streams.Producer do
         :error -> "No Type"
       end
     display = %{activity: activity, type: type}
-    # state = body["Strings"]
-    state = display
+    Phoenix.PubSub.broadcast(
+      StreamHandler.PubSub,
+      @activities,
+      %{topic: @activities, payload: %{status: :complete, data: display, text: "Activities has completed."}}
+    )
+    state = Map.put(state, :activities_ref, activities_ref)
     {:noreply, state}
   end
 
@@ -200,17 +203,12 @@ defmodule StreamHandler.Streams.Producer do
 
   @impl true
   def handle_info(:emojis, state) do
-    Process.send_after(self(), :emojis, @call_interval_ms)
+    emojis_ref = Process.send_after(self(), :emojis, @call_interval_ms)
     IO.puts(Enum.count(state))
 
     body = get_emojis()
     IO.inspect(body, label: "Body")
     # http://apilayer.net/api/live?access_key=#{System.fetch_env!("FOREX_API_KEY")}&currencies=EUR,GBP,CAD,PLN&source=USD&format=1
-    Phoenix.PubSub.broadcast(
-      StreamHandler.PubSub,
-      @emojis,
-      %{topic: @emojis, payload: %{status: :complete, data: state, text: "Emojis has completed"}}
-    )
     name =
       case Map.fetch(body, "name") do
         {:ok, str} -> str
@@ -237,10 +235,12 @@ defmodule StreamHandler.Streams.Producer do
     #     :error -> "No Type"
     #   end
     display = %{name: name, category: category, group: group, unicode: unicode}
-    # state = body["Strings"]
-    state = display
-    {:noreply, state}
-
+    Phoenix.PubSub.broadcast(
+      StreamHandler.PubSub,
+      @emojis,
+      %{topic: @emojis, payload: %{status: :complete, data: display, text: "Emojis has completed"}}
+    )
+    state = Map.put(state, :emojis_ref, emojis_ref)
     {:noreply, state}
   end
 end

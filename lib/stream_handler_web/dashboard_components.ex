@@ -4,10 +4,10 @@ defmodule StreamHandlerWeb.DashboardComponents do
 
   def activities_card(assigns) do
     ~H"""
-    <%= if @activities && Enum.count(@activities.data) > 0 do %>
-      <%= StreamHandlerWeb.TemplateHelpers.type_icon(@activities.data.type) %>
-      <p>Type: <span><%= @activities.data.type %></span></p>
-      <p>Activity: <span><%= @activities.data.activity %></span></p>
+    <%= if @activities && Enum.count(@activities) > 0 do %>
+      <%= StreamHandlerWeb.TemplateHelpers.type_icon(@activities.type) %>
+      <p>Type: <span><%= @activities.type %></span></p>
+      <p>Activity: <span><%= @activities.activity %></span></p>
     <% end %>
     """
   end
@@ -15,11 +15,10 @@ defmodule StreamHandlerWeb.DashboardComponents do
   def slugs_card(assigns) do
     ~H"""
       <h4>Slugs</h4>
-      <p>Status: <%= if @text_slugs && Enum.count(@text_slugs) > 0 do %><span>Complete</span><% end %></p>
-      <p>Number: <span><%= @number_slugs %></span></p>
+      <p>Status: <%= if @slugs && Enum.count(@slugs) > 0 do %><span>Complete</span><% end %></p>
       <ul>
-        <%= if @text_slugs && Enum.count(@text_slugs) > 0 do %>
-          <%= for slug <- @text_slugs do %>
+        <%= if @slugs && Enum.count(@slugs) > 0 do %>
+          <%= for slug <- @slugs do %>
             <li><%= slug %></li>
           <% end %>
         <% end %>
@@ -30,13 +29,13 @@ defmodule StreamHandlerWeb.DashboardComponents do
   def emojis_card(assigns) do
     ~H"""
       <h4>Emojis</h4>
-      <p>Status: <%= if @emoji && Enum.count(@emoji) > 0 do %><span>Complete</span><% end %></p>
-      <%= if @emoji && Enum.count(@emoji) > 0 do %>
+      <p>Status: <%= if @emojis && Enum.count(@emojis) > 0 do %><span>Complete</span><% end %></p>
+      <%= if @emojis && Enum.count(@emojis) > 0 do %>
         <ul>
-          <li><%= @emoji.name %></li>
-          <li><%= @emoji.category %></li>
-          <li><%= @emoji.group %></li>
-          <li><%= @emoji.unicode %></li>
+          <li><%= @emojis.name %></li>
+          <li><%= @emojis.category %></li>
+          <li><%= @emojis.group %></li>
+          <li><%= @emojis.unicode %></li>
         </ul>
       <% end %>
     """

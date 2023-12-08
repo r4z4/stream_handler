@@ -37,14 +37,16 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     StreamHandlerWeb.Endpoint.subscribe(@activities)
     StreamHandlerWeb.Endpoint.subscribe(@topic_3)
     StreamHandlerWeb.Endpoint.subscribe(@topic_4)
+    init_map = %{1 => false, 2 => false, 3 => false, 4 => false, 5 => false, 6 => false, 7 => false, 8 => false, 9 => false, 10 => false, 11 => false, 12 => false, 13 => false, 14 => false, 15 => false, 16 => false, 17 => false, 18 => false}
     {:ok,
       socket
-      |> assign(:clicked_map, nil)
-      |> assign(:text_slugs, nil)
-      |> assign(:number_slugs, 1)
-      |> assign(:emoji, nil)
+      |> assign(:clicked_map, init_map)
+      |> assign(:slugs, nil)
+      |> assign(:emojis, nil)
       |> assign(:reader, nil)
       |> assign(:images, nil)
+      |> assign(:activities, nil)
+      |> assign(:aq, nil)
 
       |> stream(:messages, [])
       |> stream(:spreads, [])
@@ -54,10 +56,6 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       |> assign(:number, 0)
       |> assign(:text_3, "Number Three")
       |> assign(:number_3, 3)
-      |> assign(:text_activities, "Activities")
-      |> assign(:number_activities, 75)
-      |> assign(:activities, nil)
-      |> assign(:aq, nil)
     }
   end
 
@@ -87,30 +85,37 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @impl true
   def handle_event("service_casted", params, socket) do
     # FIXME
-    clicked_map = %{1 => false, 2 => false, 3 => false, 4 => false, 5 => false, 6 => false, 7 => false, 8 => false, 9 => false, 10 => false, 11 => false, 12 => false, 13 => false, 14 => false, 15 => false, 16 => false, 17 => false, 18 => false}
+    clicked_map = socket.assigns.clicked_map
     {int, _rem} = Integer.parse(params["id"])
-    adjusted_map = Map.put(clicked_map, int, !clicked_map[int])
+    map_int =
+      case int do
+        x when x in 1..9 -> x
+        x when x in 10..18 -> x - 9
+        _ -> 0
+      end
+    adjusted_map = Map.put(clicked_map, map_int, !clicked_map[map_int])
     case params["id"] do
       # Num + 9 is the Key for Stopping Service (for now)
       "1" ->
-        IO.puts "Service #1 Casted"
+        IO.puts "Slugs Casted"
         # StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic_4, "test_message", [])
         GenServer.cast :consumer_1, {:fetch_resource, :slugs}
       "10" ->
         IO.puts "Service #1 (Slugs) Stopped"
         # StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic_4, "test_message", [])
         GenServer.cast :consumer_1, {:stop_resource, :slugs}
-
       "2" ->
-        IO.puts "Service #2 Casted"
+        IO.puts "Emojis Casted"
         GenServer.cast :consumer_2, {:fetch_resource, :emojis}
+      "11" ->
+        IO.puts "Emojis Stopped"
+        GenServer.cast :consumer_2, {:stop_resource, :emojis}
       "3" ->
-        IO.puts "Service #2 Casted"
-        GenServer.cast :consumer_2, {:fetch_resource, :increment}
-        GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 2}}
-        GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 2}}
-        GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 2}}
-        GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 2}}
+        IO.puts "Activities Casted"
+        GenServer.cast :consumer_4, {:fetch_resource, :activities}
+      "12" ->
+        IO.puts "Activities Stopped"
+        GenServer.cast :consumer_4, {:stop_resource, :activities}
       "4" ->
         IO.puts "Service #3 Casted"
         GenServer.cast :consumer_3, {:fetch_resource, :custom_event}
@@ -120,7 +125,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 3}}
       "5" ->
         IO.puts "Casting All Services"
-        GenServer.cast :consumer_4, {:fetch_resource, :activities}
+        GenServer.cast :consumer_4, {:fetch_resource, :increment}
         GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 4}}
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 4}}
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 4}}
@@ -139,7 +144,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :reader, {:fetch_resource, :images}
       "18" ->
         IO.puts "Images Stopped"
-        GenServer.cast :reader, {:fetch_resource, :images}
+        GenServer.cast :reader, {:stop_resource, :images}
       _ ->
         IO.puts "No Service Casted"
     end
@@ -186,21 +191,20 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @impl true
   def handle_info(%{topic: @slugs, payload: msg}, socket) do
     IO.inspect(socket)
-    IO.puts "HANDLE BROADCAST SLUGS FOR #{msg[:text]}"
+    IO.puts "Handle Broadcast for Slugs"
     {:noreply,
       socket
-      |> assign(:text_slugs, msg[:data])
-      |> assign(:number_slugs, 11)
+      |> assign(:slugs, msg[:data])
     }
   end
 
   @impl true
   def handle_info(%{topic: @emojis, payload: msg}, socket) do
     IO.inspect(socket)
-    IO.puts "HANDLE BROADCAST SLUGS FOR #{msg[:text]}"
+    IO.puts "Handle Broadcast for Emojis"
     {:noreply,
       socket
-      |> assign(:emoji, msg[:data])
+      |> assign(:emojis, msg[:data])
     }
   end
 
@@ -208,12 +212,12 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   def handle_info(%{topic: @activities, payload: msg}, socket) do
     IO.inspect(socket)
     IO.inspect(msg, label: "Msg")
-    IO.puts "HANDLE BROADCAST ACTIVITIES FOR #{msg[:text]}"
+    IO.puts "Handle Broadcast for Activities"
     {:noreply,
       socket
-      |> assign(:activities, msg)
-      |> assign(:text_activities, msg[:text])
-      |> assign(:number_activities, 98)
+      |> assign(:activities, msg[:data])
+      # Might want to use :status at some point?
+      # |> assign(:activities, msg)
     }
   end
 
@@ -221,7 +225,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   def handle_info(%{topic: @aq, payload: msg}, socket) do
     IO.inspect(socket)
     IO.inspect(msg, label: "Msg")
-    IO.puts "HANDLE BROADCAST ACTIVITIES FOR #{msg[:text]}"
+    IO.puts "HANDLE Broadcast Aq FOR #{msg[:text]}"
     {:noreply,
       socket
       |> assign(:aq, msg)
@@ -232,7 +236,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   def handle_info(%{topic: @reader, payload: msg}, socket) do
     IO.inspect(socket)
     IO.inspect(msg, label: "Msg")
-    IO.puts "HANDLE BROADCAST ACTIVITIES FOR #{msg[:text]}"
+    IO.puts "Handle Broadcast for Reader"
     {:noreply,
       socket
       |> assign(:reader, msg)
