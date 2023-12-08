@@ -13,6 +13,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @topic_3 "test_3"
   @topic_4 "test_4"
   @reader "reader"
+  @images "images"
 
   @impl true
   def handle_call(:ping, _from, state) do
@@ -29,6 +30,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     StreamHandlerWeb.Endpoint.subscribe(@slugs)
     StreamHandlerWeb.Endpoint.subscribe(@emojis)
     StreamHandlerWeb.Endpoint.subscribe(@reader)
+    StreamHandlerWeb.Endpoint.subscribe(@images)
     StreamHandlerWeb.Endpoint.subscribe("websocket")
 
     StreamHandlerWeb.Endpoint.subscribe(@aq)
@@ -37,10 +39,12 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     StreamHandlerWeb.Endpoint.subscribe(@topic_4)
     {:ok,
       socket
+      |> assign(:clicked_map, nil)
       |> assign(:text_slugs, nil)
       |> assign(:number_slugs, 1)
       |> assign(:emoji, nil)
       |> assign(:reader, nil)
+      |> assign(:images, nil)
 
       |> stream(:messages, [])
       |> stream(:spreads, [])
@@ -82,15 +86,21 @@ defmodule StreamHandlerWeb.StreamLive.Index do
 
   @impl true
   def handle_event("service_casted", params, socket) do
+    # FIXME
+    clicked_map = %{1 => false, 2 => false, 3 => false, 4 => false, 5 => false, 6 => false, 7 => false, 8 => false, 9 => false, 10 => false, 11 => false, 12 => false, 13 => false, 14 => false, 15 => false, 16 => false, 17 => false, 18 => false}
+    {int, _rem} = Integer.parse(params["id"])
+    adjusted_map = Map.put(clicked_map, int, !clicked_map[int])
     case params["id"] do
+      # Num + 9 is the Key for Stopping Service (for now)
       "1" ->
         IO.puts "Service #1 Casted"
         # StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic_4, "test_message", [])
         GenServer.cast :consumer_1, {:fetch_resource, :slugs}
-        GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 1}}
-        GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 1}}
-        GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 1}}
-        GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 1}}
+      "10" ->
+        IO.puts "Service #1 (Slugs) Stopped"
+        # StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic_4, "test_message", [])
+        GenServer.cast :consumer_1, {:stop_resource, :slugs}
+
       "2" ->
         IO.puts "Service #2 Casted"
         GenServer.cast :consumer_2, {:fetch_resource, :emojis}
@@ -109,13 +119,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 3}}
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 3}}
       "5" ->
-        IO.puts "Service #4 Casted"
-        # IO.inspect(socket)
-        # Phoenix.PubSub.broadcast(
-        #   StreamHandler.PubSub,
-        #   @topic_4,
-        #   %{topic: @topic_4, payload: %{status: :complete, text: "Service #4 has completed."}}
-        # )
+        IO.puts "Casting All Services"
         GenServer.cast :consumer_4, {:fetch_resource, :activities}
         GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 4}}
         GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 4}}
@@ -124,13 +128,24 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       "6" ->
         IO.puts "AQ Casted"
         GenServer.cast :consumer_3, {:fetch_resource, :aq}
-      "7" ->
+      "8" ->
         IO.puts "Reader Casted"
         GenServer.cast :reader, {:fetch_resource, :reader}
+      "17" ->
+        IO.puts "Stopping Reader"
+        GenServer.cast :reader, {:stop_resource, :reader}
+      "9" ->
+        IO.puts "Images Casted"
+        GenServer.cast :reader, {:fetch_resource, :images}
+      "18" ->
+        IO.puts "Images Stopped"
+        GenServer.cast :reader, {:fetch_resource, :images}
       _ ->
         IO.puts "No Service Casted"
     end
-    {:noreply, socket}
+    {:noreply,
+      socket
+      |> assign(clicked_map: adjusted_map)}
   end
 
   @impl true
@@ -225,6 +240,17 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   end
 
   @impl true
+  def handle_info(%{topic: @images, payload: msg}, socket) do
+    IO.inspect(socket)
+    IO.inspect(msg, label: "Msg")
+    IO.puts "Handle Broadcast @images"
+    {:noreply,
+      socket
+      |> assign(:images, msg)
+    }
+  end
+
+  @impl true
   def handle_info(%{event: "new_message", payload: new_message}, socket) do
     # updated_messages = socket.assigns[:messages] ++ [new_message]
     IO.inspect(socket, label: "Socket")
@@ -252,5 +278,9 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     {:noreply,
         socket
         |> stream_insert(:spreads, new_message)}
+  end
+
+  defp build_button_assigns do
+
   end
 end

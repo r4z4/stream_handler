@@ -51,4 +51,14 @@ defmodule StreamHandlerWeb.DashboardComponents do
       <% end %>
     """
   end
+
+  def images_card(assigns) do
+    ~H"""
+      <h4>Images</h4>
+      <p>Status: <%= if @images && Enum.count(@images) > 0 do %><span><%= @images.status %></span><% end %></p>
+      <%= if @images && Enum.count(@images) > 0 do %>
+          <img width="200" height="300" src={@images.string} />
+      <% end %>
+    """
+  end
 end

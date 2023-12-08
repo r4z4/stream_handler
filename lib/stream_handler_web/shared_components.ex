@@ -55,20 +55,10 @@ defmodule StreamHandlerWeb.SharedComponents do
         <button
           type="button"
           phx-click="service_casted"
-          phx-value-id={0}
-          value={0}
-          class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
-        >Get All Services
-        </button>
-      </div>
-      <div>
-        <button
-          type="button"
-          phx-click="service_casted"
           phx-value-id={5}
           value={5}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
-        >Service #5
+        >Get All Services
         </button>
       </div>
       <div>
@@ -85,18 +75,32 @@ defmodule StreamHandlerWeb.SharedComponents do
         <button
           type="button"
           phx-click="service_casted"
-          phx-value-id={7}
-          value={7}
+          phx-value-id={9}
+          value={9}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
         >Service #7
         </button>
       </div>
       <div>
+
+
         <button
           type="button"
           phx-click="service_casted"
-          phx-value-id={8}
-          value={8}
+          phx-value-id={if @clicked_map && @clicked_map[8] do 17 else 8 end}
+          value={17}
+          class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
+        ><%= if @clicked_map && @clicked_map[8] do %>Stop #7<% else %>Start #7<% end %>
+        </button>
+
+
+      </div>
+      <div>
+        <button
+          type="button"
+          phx-click="service_casted"
+          phx-value-id={9}
+          value={9}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
         >Service #8
         </button>

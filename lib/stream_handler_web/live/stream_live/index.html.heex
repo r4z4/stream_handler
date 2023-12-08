@@ -1,47 +1,46 @@
 <.header>
   Listing
 </.header>
-  <div class="grid grid-rows-3 grid-flow-col gap-4 w-full">
+  <div class="grid grid-cols-3 gap-2 w-full">
 
-    <div class="border-black border-4 p-8">
+    <div class="h-56 border-black border-4 p-8">
       <StreamHandlerWeb.DashboardComponents.slugs_card text_slugs={@text_slugs} number_slugs={@number_slugs} />
     </div>
 
-    <div class="border-black border-4 p-8">
+    <div class="h-56 border-black border-4 p-8">
       <StreamHandlerWeb.DashboardComponents.emojis_card emoji={@emoji} />
     </div>
 
-    <div class="border-black border-4 p-8">
+    <div class="h-56 border-black border-4 p-8">
       <StreamHandlerWeb.DashboardComponents.activities_card activities={@activities} />
     </div>
 
-    <div class="border-black border-4 p-8">
+    <div class="h-56 border-black border-4 p-8">
       Status: <span><%= @text_3 %></span>
       Number: <%= @number_3 %>
     </div>
 
-    <div class="border-black border-4 p-8">
+    <div class="h-56 border-black border-4 p-8">
       <p>Test</p>
-      <StreamHandlerWeb.SharedComponents.button_card name="Warsaw"/>
+      <StreamHandlerWeb.SharedComponents.button_card clicked_map={@clicked_map} />
     </div>
   
-    <div class="border-black border-4 p-8">
+    <div class="h-56 border-black border-4 p-8">
       Status: <span><%= @text_activities %></span>
       Activities Number: <%= @number_activities %>
     </div>
 
-    <div class="border-black border-4 p-8">
+    <div class="h-56 border-black border-4 p-8">
       <p>Test</p>
       <StreamHandlerWeb.SharedComponents.display_card name="Warsaw"/>
     </div>
 
-    <div class="border-black border-4 p-8">
+    <div class="h-56 border-black border-4 p-8">
       <StreamHandlerWeb.DashboardComponents.reader_card reader={@reader} />
     </div>
     
-    <div class="border-black border-4 p-8">
-      <p>Test</p>
-      <StreamHandlerWeb.SharedComponents.display_card name="Warsaw"/>
+    <div class="h-56 border-black border-4 p-8">
+      <StreamHandlerWeb.DashboardComponents.images_card images={@images} />
     </div>
 
   </div>
