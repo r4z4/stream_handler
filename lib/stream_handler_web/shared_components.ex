@@ -45,20 +45,20 @@ defmodule StreamHandlerWeb.SharedComponents do
         <button
           type="button"
           phx-click="service_casted"
-          phx-value-id={4}
+          phx-value-id={if @clicked_map && @clicked_map[4] do 13 else 4 end}
           value={4}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
-        >Service #4
+        ><%= if @clicked_map && @clicked_map[4] do %>Stop WS<% else %>Start WS<% end %>
         </button>
       </div>
       <div>
         <button
           type="button"
           phx-click="service_casted"
-          phx-value-id={5}
+          phx-value-id={if @clicked_map && @clicked_map[5] do 14 else 5 end}
           value={5}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
-        >Get All Services
+        ><%= if @clicked_map && @clicked_map[5] do %>Stop All Services<% else %>Start All Services<% end %>
         </button>
       </div>
       <div>

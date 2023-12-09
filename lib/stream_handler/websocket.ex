@@ -2,13 +2,35 @@ defmodule StreamHandler.Websocket do
   use WebSockex
   require Logger
 
-  def start_link(_), do: WebSockex.start_link("wss://ws.kraken.com", __MODULE__, nil)
+  @ws "ws"
+  def start_link(_), do: WebSockex.start_link("wss://ws.kraken.com", __MODULE__, nil, name: :kraken)
 
   @impl true
   def handle_connect(_conn, state) do
     Logger.info("Connected...")
     send(self(), :subscribe)
     {:ok, state}
+  end
+
+  # @impl true
+  # def handle_cast({:fetch_resource, sym}, state) do
+  #   Process.send_after(self(), sym, @time_interval_ms)
+  #   IO.puts(sym)
+  #   {:noreply, state}
+  # end
+
+  @impl true
+  def handle_cast({:stop_resource, sym}, state) do
+    IO.puts "Kraken Stopping"
+    IO.inspect(state, label: "State")
+    # case sym do
+    #   :ws -> Process.cancel_timer(state.images_ref)
+    #   _ -> Process.cancel_timer(state.reader_ref)
+    # end
+    send(self(), :close_socket)
+    # Process.cancel_timer(self(), sym, @time_interval_ms)
+    IO.puts(sym)
+    {:noreply, state}
   end
 
   @impl true
@@ -43,5 +65,10 @@ defmodule StreamHandler.Websocket do
         "subscription" => %{"name" => "*"}
       })
     {:reply, {:text, subscribe}, state}
+  end
+
+  def handle_info(:close_socket, state) do
+    # :timer.cancel(t_ref)
+    {:close, state}
   end
 end

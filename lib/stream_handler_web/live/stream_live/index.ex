@@ -121,18 +121,31 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_4, {:stop_resource, :activities}
       "4" ->
         IO.puts "Service #3 Casted"
-        GenServer.cast :consumer_3, {:fetch_resource, :custom_event}
-        GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 3}}
-        GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 3}}
-        GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 3}}
-        GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 3}}
+        StreamHandler.Websocket.start_link(:hey)
+        # GenServer.cast :consumer_3, {:fetch_resource, :custom_event}
+        # GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 3}}
+        # GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 3}}
+        # GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 3}}
+        # GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 3}}
+      "13" ->
+        IO.puts "Service #3 Casted"
+        WebSockex.cast :kraken, {:stop_resource, :ws}
       "5" ->
         IO.puts "Casting All Services"
-        GenServer.cast :consumer_4, {:fetch_resource, :increment}
-        GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 4}}
-        GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 4}}
-        GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 4}}
-        GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 4}}
+        GenServer.cast :reader,     {:fetch_resource, :reader}
+        GenServer.cast :reader,     {:fetch_resource, :images}
+        GenServer.cast :consumer_2, {:fetch_resource, :emojis}
+        GenServer.cast :consumer_1, {:fetch_resource, :slugs}
+        GenServer.cast :reader,     {:fetch_resource, :ets}
+        GenServer.cast :consumer_4, {:fetch_resource, :activities}
+      "14" ->
+        IO.puts "Casting All Services"
+        GenServer.cast :reader,     {:stop_resource, :reader}
+        GenServer.cast :reader,     {:stop_resource, :images}
+        GenServer.cast :consumer_2, {:stop_resource, :emojis}
+        GenServer.cast :consumer_1, {:stop_resource, :slugs}
+        GenServer.cast :reader,     {:stop_resource, :ets}
+        GenServer.cast :consumer_4, {:stop_resource, :activities}
       "6" ->
         IO.puts "Leaderboard Casted"
         GenServer.cast :reader, {:fetch_resource, :ets}
