@@ -73,4 +73,23 @@ defmodule StreamHandlerWeb.DashboardComponents do
       <% end %>
     """
   end
+
+  def kraken_card(assigns) do
+    ~H"""
+      <div>
+        <h3>Kraken</h3>
+        <div id="messages" phx-update="stream">
+          <div :for={{dom_id, message} <- @streams.messages} id={dom_id}>
+            <p><%= message.id %> -> <%= message.data["c"] %></p>
+          </div>
+        </div>
+
+        <div id="spreads" phx-update="stream">
+          <div :for={{dom_id, message} <- @streams.spreads} id={dom_id}>
+            <p><%= message.id %> -> <%= message.data %></p>
+          </div>
+        </div>
+      </div>
+    """
+  end
 end

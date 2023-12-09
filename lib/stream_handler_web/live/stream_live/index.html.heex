@@ -16,8 +16,7 @@
     </div>
 
     <div class="h-56 border-black border-4 p-8">
-      Status: <span><%= @text_3 %></span>
-      Number: <%= @number_3 %>
+      <StreamHandlerWeb.DashboardComponents.kraken_card streams={@streams} />
     </div>
 
     <div class="h-56 border-black border-4 p-8">
@@ -43,17 +42,3 @@
 
   </div>
 
-  <div>
-    <h3>Kraken</h3>
-    <div id="messages" phx-update="stream">
-      <div :for={{dom_id, message} <- @streams.messages} id={dom_id}>
-        <p><%= message.id %> -> <%= message.data["c"] %></p>
-      </div>
-    </div>
-
-    <div id="spreads" phx-update="stream">
-      <div :for={{dom_id, message} <- @streams.spreads} id={dom_id}>
-        <p><%= message.id %> -> <%= message.data %></p>
-      </div>
-    </div>
-  </div>

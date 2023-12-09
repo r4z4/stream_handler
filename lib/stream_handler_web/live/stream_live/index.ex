@@ -314,7 +314,4 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         |> stream_insert(:spreads, new_message)}
   end
 
-  defp build_button_assigns do
-
-  end
 end
