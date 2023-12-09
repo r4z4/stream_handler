@@ -41,6 +41,19 @@ defmodule StreamHandlerWeb.DashboardComponents do
     """
   end
 
+  # FIXME @ets.string
+  def ets_card(assigns) do
+    ~H"""
+      <h4>ETS</h4>
+      <p>Status: <%= if @ets && Enum.count(@ets) > 0 do %><span>Complete</span><% end %></p>
+      <%= if @ets && Enum.count(@ets) > 0 do %>
+        <%= for score <- @ets.string do %>
+          <li><%= score.username %> || <%= score.score %> || <%= score.joined %></li>
+        <% end %>
+      <% end %>
+    """
+  end
+
   def reader_card(assigns) do
     ~H"""
       <h4>Reader</h4>

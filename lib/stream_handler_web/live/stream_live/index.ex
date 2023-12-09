@@ -10,6 +10,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @emojis "emojis"
   @activities "activities"
   @aq "aq"
+  @ets "ets"
   @topic_3 "test_3"
   @topic_4 "test_4"
   @reader "reader"
@@ -31,6 +32,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     StreamHandlerWeb.Endpoint.subscribe(@emojis)
     StreamHandlerWeb.Endpoint.subscribe(@reader)
     StreamHandlerWeb.Endpoint.subscribe(@images)
+    StreamHandlerWeb.Endpoint.subscribe(@ets)
     StreamHandlerWeb.Endpoint.subscribe("websocket")
 
     StreamHandlerWeb.Endpoint.subscribe(@aq)
@@ -46,6 +48,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       |> assign(:reader, nil)
       |> assign(:images, nil)
       |> assign(:activities, nil)
+      |> assign(:ets, nil)
       |> assign(:aq, nil)
 
       |> stream(:messages, [])
@@ -131,8 +134,11 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 4}}
         GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 4}}
       "6" ->
-        IO.puts "AQ Casted"
-        GenServer.cast :consumer_3, {:fetch_resource, :aq}
+        IO.puts "Leaderboard Casted"
+        GenServer.cast :reader, {:fetch_resource, :ets}
+      "15" ->
+        IO.puts "Leaderboard Stopped"
+        GenServer.cast :reader, {:stop_resource, :ets}
       "8" ->
         IO.puts "Reader Casted"
         GenServer.cast :reader, {:fetch_resource, :reader}
@@ -229,6 +235,17 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     {:noreply,
       socket
       |> assign(:aq, msg)
+    }
+  end
+
+  @impl true
+  def handle_info(%{topic: @ets, payload: msg}, socket) do
+    IO.inspect(socket)
+    IO.inspect(msg, label: "Msg")
+    IO.puts "Handle Broadcast ETS For #{msg[:text]}"
+    {:noreply,
+      socket
+      |> assign(:ets, msg)
     }
   end
 

@@ -1,10 +1,13 @@
 defmodule StreamHandler.Streams.Reader do
   use GenServer
+  alias StreamHandler.Repo
+  alias StreamHandler.Streams.UserScore
 
   @time_interval_ms 2000
   @call_interval_ms 7000
   @reader "reader"
   @images "images"
+  @ets "ets"
 
   def start_link([name, state]) do
     IO.inspect(state, label: "start_link")
@@ -25,6 +28,7 @@ defmodule StreamHandler.Streams.Reader do
     case sym do
       :images -> Process.cancel_timer(state.images_ref)
       :reader -> Process.cancel_timer(state.reader_ref)
+      :ets -> Process.cancel_timer(state.ets_ref)
       _ -> Process.cancel_timer(state.reader_ref)
     end
     # Process.cancel_timer(self(), sym, @time_interval_ms)
@@ -34,8 +38,10 @@ defmodule StreamHandler.Streams.Reader do
 
   @impl true
   def init(state) do
+    _table = :ets.new(:user_scores, [:ordered_set, :protected, :named_table])
+    initialize_score_ets_from_db()
     IO.inspect state, label: "init"
-    refs_map = %{reader_ref: nil, images_ref: nil}
+    refs_map = %{reader_ref: nil, images_ref: nil, ets_ref: nil}
     {:ok, refs_map}
   end
 
@@ -48,6 +54,14 @@ defmodule StreamHandler.Streams.Reader do
   #   {:ok, body} = Jason.decode(resp.body)
   #   body
   # end
+
+  def initialize_score_ets_from_db do
+    user_scores = Repo.all(UserScore)
+    Enum.map(user_scores, fn score ->
+      IO.inspect(score, label: "Score")
+      :ets.insert(:user_scores, {score.username, score.score, score.joined})
+    end)
+  end
 
   defp publish({line, index}) do
     Phoenix.PubSub.broadcast(
@@ -63,6 +77,26 @@ defmodule StreamHandler.Streams.Reader do
       at,
       %{topic: at, payload: %{status: :complete, string: str}}
     )
+  end
+
+  def shuffle_user_scores(user_scores) do
+    :ets.delete(:user_scores)
+    :ets.new(:user_scores, [:ordered_set, :protected, :named_table])
+    Enum.map(user_scores, fn score ->
+      :ets.insert(:user_scores, {score.username, :rand.uniform(150), score.joined})
+    end)
+  end
+
+  def get_user_scores do
+    # ms = :ets.fun2ms fn {score, username, joined} -> {score, username, joined} end
+    tuples = :ets.tab2list(:user_scores)
+    user_scores =
+      Enum.map(tuples, fn {username, score, joined} ->
+        %UserScore{username: username, score: score, joined: joined}
+      end)
+    # scores = :ets.match_object(:user_scores, {'$0', '$1', '$2'})
+    # IO.inspect(scores, label: scores)
+    user_scores
   end
 
   @impl true
@@ -95,6 +129,24 @@ defmodule StreamHandler.Streams.Reader do
     images_ref = Process.send_after(self(), :images, @time_interval_ms)
     # state = state ++ ["b"]
     state = Map.put(state, :images_ref, images_ref)
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info(:ets, state) do
+    IO.puts "Handle ETS"
+    scores = get_user_scores()
+    shuffle_user_scores(scores)
+    # struct_list =
+    #   Enum.map(scores, fn score ->
+    #     _s = struct!(UserScore, score)
+    #   end)
+    # IO.inspect(struct_list, label: "Struct List")
+    sorted = Enum.sort_by(scores, &(&1.score), :desc)
+    publish_str(@ets, sorted)
+    ets_ref = Process.send_after(self(), :ets, @time_interval_ms)
+    # state = state ++ ["b"]
+    state = Map.put(state, :ets_ref, ets_ref)
     {:noreply, state}
   end
 
