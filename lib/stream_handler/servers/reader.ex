@@ -1,4 +1,4 @@
-defmodule StreamHandler.Streams.Reader do
+defmodule StreamHandler.Servers.Reader do
   use GenServer
   alias StreamHandler.Repo
   alias StreamHandler.Streams.UserScore
