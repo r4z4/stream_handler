@@ -51,8 +51,9 @@ if config_env() == :prod do
       environment variable SECRET_KEY_BASE is missing.
       You can generate one by calling: mix phx.gen.secret
       """
-
-  host = System.get_env("PHX_HOST") || "example.com"
+  # Render populates RENDER_EXTERNAL_HOSTNAME for config/prod.exs.
+  host = System.get_env("RENDER_EXTERNAL_HOSTNAME") || "localhost"
+  # host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :stream_handler, StreamHandlerWeb.Endpoint,
