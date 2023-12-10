@@ -27,7 +27,8 @@ defmodule StreamHandler.Application do
       Supervisor.child_spec({StreamHandler.Streams.Producer, [:consumer_2, []]}, id: :consumer_2),
       Supervisor.child_spec({StreamHandler.Streams.Producer, [:consumer_3, []]}, id: :consumer_3),
       Supervisor.child_spec({StreamHandler.Streams.Producer, [:consumer_4, []]}, id: :consumer_4),
-      Supervisor.child_spec({StreamHandler.Streams.Reader, [:reader, []]}, id: :reader)
+      Supervisor.child_spec({StreamHandler.Streams.Reader, [:reader, []]}, id: :reader),
+      Supervisor.child_spec({StreamHandler.Servers.Streamer, [:streamer, []]}, id: :streamer)
       # Start a worker by calling: StreamHandler.Worker.start_link(arg)
       # {StreamHandler.Worker, arg}
     ]

@@ -53,7 +53,8 @@ defmodule StreamHandler.MixProject do
       {:dotenv_parser, "~> 2.0"},
       {:websockex, "~> 0.4.3"},
       {:logger_file_backend, "~> 0.0.10"},
-      {:stream_data, "~> 0.5"}
+      {:stream_data, "~> 0.5"},
+      {:contex, "~> 0.5.0"}
     ]
   end
 

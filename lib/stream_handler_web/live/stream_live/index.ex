@@ -14,6 +14,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @topic_3 "test_3"
   @topic_4 "test_4"
   @reader "reader"
+  @streamer "streamer"
   @images "images"
 
   @impl true
@@ -31,6 +32,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     StreamHandlerWeb.Endpoint.subscribe(@slugs)
     StreamHandlerWeb.Endpoint.subscribe(@emojis)
     StreamHandlerWeb.Endpoint.subscribe(@reader)
+    StreamHandlerWeb.Endpoint.subscribe(@streamer)
     StreamHandlerWeb.Endpoint.subscribe(@images)
     StreamHandlerWeb.Endpoint.subscribe(@ets)
     StreamHandlerWeb.Endpoint.subscribe("websocket")
@@ -50,6 +52,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       |> assign(:activities, nil)
       |> assign(:ets, nil)
       |> assign(:aq, nil)
+      |> assign(:streamer_svg, nil)
 
       |> stream(:messages, [])
       |> stream(:spreads, [])
@@ -107,29 +110,33 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         IO.puts "Service #1 (Slugs) Stopped"
         # StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic_4, "test_message", [])
         GenServer.cast :consumer_1, {:stop_resource, :slugs}
+
       "2" ->
         IO.puts "Emojis Casted"
         GenServer.cast :consumer_2, {:fetch_resource, :emojis}
       "11" ->
         IO.puts "Emojis Stopped"
         GenServer.cast :consumer_2, {:stop_resource, :emojis}
+
       "3" ->
         IO.puts "Activities Casted"
         GenServer.cast :consumer_4, {:fetch_resource, :activities}
       "12" ->
         IO.puts "Activities Stopped"
         GenServer.cast :consumer_4, {:stop_resource, :activities}
+
       "4" ->
-        IO.puts "Service #3 Casted"
-        StreamHandler.Websocket.start_link(:hey)
+        IO.puts "WebSockex Casted"
+        StreamHandler.Websocket.start(:hey)
         # GenServer.cast :consumer_3, {:fetch_resource, :custom_event}
         # GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 3}}
         # GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 3}}
         # GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 3}}
         # GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 3}}
       "13" ->
-        IO.puts "Service #3 Casted"
+        IO.puts "WebSockex Stopped"
         WebSockex.cast :kraken, {:stop_resource, :ws}
+
       "5" ->
         IO.puts "Casting All Services"
         GenServer.cast :reader,     {:fetch_resource, :reader}
@@ -139,25 +146,35 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :reader,     {:fetch_resource, :ets}
         GenServer.cast :consumer_4, {:fetch_resource, :activities}
       "14" ->
-        IO.puts "Casting All Services"
+        IO.puts "Stopping All Services"
         GenServer.cast :reader,     {:stop_resource, :reader}
         GenServer.cast :reader,     {:stop_resource, :images}
         GenServer.cast :consumer_2, {:stop_resource, :emojis}
         GenServer.cast :consumer_1, {:stop_resource, :slugs}
         GenServer.cast :reader,     {:stop_resource, :ets}
         GenServer.cast :consumer_4, {:stop_resource, :activities}
+
       "6" ->
         IO.puts "Leaderboard Casted"
         GenServer.cast :reader, {:fetch_resource, :ets}
       "15" ->
         IO.puts "Leaderboard Stopped"
         GenServer.cast :reader, {:stop_resource, :ets}
+
+      "7" ->
+        IO.puts "Streamer Casted"
+        GenServer.cast :streamer, {:fetch_resource, :streamer}
+      "16" ->
+        IO.puts "Streamer Stopped"
+        GenServer.cast :streamer, {:stop_resource, :streamer}
+
       "8" ->
         IO.puts "Reader Casted"
         GenServer.cast :reader, {:fetch_resource, :reader}
       "17" ->
         IO.puts "Stopping Reader"
         GenServer.cast :reader, {:stop_resource, :reader}
+
       "9" ->
         IO.puts "Images Casted"
         GenServer.cast :reader, {:fetch_resource, :images}
@@ -270,6 +287,17 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     {:noreply,
       socket
       |> assign(:reader, msg)
+    }
+  end
+
+  @impl true
+  def handle_info(%{topic: @streamer, payload: msg}, socket) do
+    IO.inspect(socket)
+    IO.inspect(msg, label: "Msg")
+    IO.puts "Handle Broadcast for Streamer"
+    {:noreply,
+      socket
+      |> assign(:streamer_svg, msg[:svg])
     }
   end
 

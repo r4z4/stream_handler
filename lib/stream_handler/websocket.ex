@@ -5,6 +5,8 @@ defmodule StreamHandler.Websocket do
   @ws "ws"
   def start_link(_), do: WebSockex.start_link("wss://ws.kraken.com", __MODULE__, nil, name: :kraken)
 
+  def start(_), do: WebSockex.start("wss://ws.kraken.com", __MODULE__, nil, name: :kraken)
+
   @impl true
   def handle_connect(_conn, state) do
     Logger.info("Connected...")

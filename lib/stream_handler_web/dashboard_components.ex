@@ -92,4 +92,12 @@ defmodule StreamHandlerWeb.DashboardComponents do
       </div>
     """
   end
+
+  def streamer_card(assigns) do
+    ~H"""
+    <div>
+      <%= if @streamer_svg do %><%= @streamer_svg %><% end %>
+    </div>
+    """
+  end
 end
