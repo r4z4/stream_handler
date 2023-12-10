@@ -16,19 +16,19 @@ defmodule StreamHandler.Application do
       # Start the Ecto repository
       StreamHandler.Repo,
       # StreamHandler.FinnhubClient,
-      # StreamHandler.Websocket,
+      # StreamHandler.Servers.Websocket,
       # Start the PubSub system
       {Phoenix.PubSub, name: StreamHandler.PubSub},
       # Start Finch
       {Finch, name: StreamHandler.Finch},
       # Start the Endpoint (http/https)
       StreamHandlerWeb.Endpoint,
-      Supervisor.child_spec({StreamHandler.Streams.Producer, [:consumer_1, []]}, id: :consumer_1),
-      Supervisor.child_spec({StreamHandler.Streams.Producer, [:consumer_2, []]}, id: :consumer_2),
-      Supervisor.child_spec({StreamHandler.Streams.Producer, [:consumer_3, []]}, id: :consumer_3),
-      Supervisor.child_spec({StreamHandler.Streams.Producer, [:consumer_4, []]}, id: :consumer_4),
-      Supervisor.child_spec({StreamHandler.Servers.Reader, [:reader, []]}, id: :reader),
-      Supervisor.child_spec({StreamHandler.Servers.Streamer, [:streamer, []]}, id: :streamer)
+      Supervisor.child_spec({StreamHandler.Servers.Producer, [:consumer_1, []]}, id: :consumer_1),
+      Supervisor.child_spec({StreamHandler.Servers.Producer, [:consumer_2, []]}, id: :consumer_2),
+      Supervisor.child_spec({StreamHandler.Servers.Producer, [:consumer_3, []]}, id: :consumer_3),
+      Supervisor.child_spec({StreamHandler.Servers.Producer, [:consumer_4, []]}, id: :consumer_4),
+      Supervisor.child_spec({StreamHandler.Servers.Reader,    [:reader, []]}, id: :reader),
+      Supervisor.child_spec({StreamHandler.Servers.Streamer,  [:streamer, []]}, id: :streamer)
       # Start a worker by calling: StreamHandler.Worker.start_link(arg)
       # {StreamHandler.Worker, arg}
     ]

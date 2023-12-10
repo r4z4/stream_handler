@@ -5,7 +5,7 @@ defmodule StreamHandler.Servers.Streamer do
   alias StreamHandler.Streams.UserScore
 
   @time_interval_ms 2000
-  @call_interval_ms 6000
+  @call_interval_ms 3000
   @max 3
   @max_2 6
   @streamer "streamer"
@@ -55,10 +55,15 @@ defmodule StreamHandler.Servers.Streamer do
     combined_list
   end
 
+  def get_color_palette do
+    pallete_list = ["FBB4AE", "B3CDE3", "CCEBC5", "C990CE", "E8CB0D", "0DC6E8", "E80D59", "#E85E0D", "B4CE90", "E80D97", "29E80D"]
+    Enum.take_random(pallete_list, 3)
+  end
+
   def generate_svg do
     data = generate_data()
     ds = Dataset.new(data, ["x", "y"])
-    point_plot = PointPlot.new(ds)
+    point_plot = PointPlot.new(ds, colour_palette: get_color_palette())
     plot = Plot.new(300, 200, point_plot)
       |> Plot.plot_options(%{legend_setting: :legend_right})
       |> Plot.titles("Stream Data Plot", "Property Testing & Data Streaming")

@@ -1,4 +1,4 @@
-defmodule StreamHandler.FinnhubClient do
+defmodule StreamHandler.Servers.FinnhubClient do
   use WebSockex
   require Logger
 

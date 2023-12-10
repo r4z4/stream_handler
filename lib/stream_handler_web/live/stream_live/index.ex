@@ -66,6 +66,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
 
       |> stream(:messages, [])
       |> stream(:spreads, [])
+      # |> stream(:tickers, [])
       |> assign(:message, '')
 
       |> assign(:text, "Start")
@@ -147,7 +148,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       "4" ->
         IO.puts "WebSockex Casted"
         # Use start and not start_link to avoid being alerted when we close conn
-        StreamHandler.Websocket.start(:hey)
+        StreamHandler.Servers.Websocket.start(:hey)
       "13" ->
         IO.puts "WebSockex Stopped"
         WebSockex.cast :kraken, {:stop_resource, :ws}
@@ -163,7 +164,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_1, {:fetch_resource, :slugs}
         GenServer.cast :consumer_4, {:fetch_resource, :activities}
         # Websockex
-        StreamHandler.Websocket.start(:hey)
+        StreamHandler.Servers.Websocket.start(:hey)
       "14" ->
         IO.puts "Stopping All Services"
         # GenServers
@@ -340,7 +341,6 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   def handle_info(%{event: "new_message", payload: new_message}, socket) do
     # updated_messages = socket.assigns[:messages] ++ [new_message]
     IO.inspect(socket, label: "Socket")
-    IO.inspect(new_message, label: "New Message")
     case new_message do
         "{\"event\":\"heartbeat\"}" ->
             IO.puts "Kraken Heartbeat"
@@ -364,6 +364,15 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     {:noreply,
         socket
         |> stream_insert(:spreads, new_message)}
+  end
+
+  @impl true
+  def handle_info(%{event: "new_ticker", payload: new_message}, socket) do
+    IO.inspect(new_message, label: "New Ticker MEssage")
+    new_message = %{id: List.first(new_message), data: Kernel.elem(List.pop_at(new_message, 1), 0)}
+    {:noreply,
+        socket
+        |> stream_insert(:tickers, new_message)}
   end
 
 end

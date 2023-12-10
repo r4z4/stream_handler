@@ -7,16 +7,16 @@
 /* Styles from Contex for Charts */
 
 .exc-tick {
-    stroke: grey;
+    stroke: rgb(40, 39, 39);
   }
   
   .exc-tick text {
-    fill: grey;
+    fill: rgb(32, 31, 31);
     stroke: none;
   }
   
   .exc-grid {
-    stroke: lightgrey;
+    stroke: rgb(31, 31, 31);
   }
   
   .exc-legend {
@@ -24,19 +24,19 @@
   }
   
   .exc-legend text {
-    fill: grey;
+    fill: rgb(20, 20, 20);
     font-size: 0.8rem;
     stroke: none;
   }
   
   .exc-title {
     fill: darkslategray;
-    font-size: 2.3rem;
+    font-size: 1.0rem;
     stroke: none;
   }
   .exc-subtitle {
     fill: darkgrey;
-    font-size: 1.0rem;
+    font-size: 0.5rem;
     stroke: none;
   }
   

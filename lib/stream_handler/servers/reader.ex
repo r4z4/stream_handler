@@ -4,7 +4,7 @@ defmodule StreamHandler.Servers.Reader do
   alias StreamHandler.Streams.UserScore
 
   @time_interval_ms 2000
-  @call_interval_ms 7000
+  @call_interval_ms 3000
   @reader "reader"
   @images "images"
   @ets "ets"

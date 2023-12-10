@@ -1,4 +1,4 @@
-defmodule StreamHandler.Websocket do
+defmodule StreamHandler.Servers.Websocket do
   use WebSockex
   require Logger
 
@@ -54,6 +54,8 @@ defmodule StreamHandler.Websocket do
     case Kernel.elem(List.pop_at(msg, 2), 0) do
       "spread" -> StreamHandlerWeb.Endpoint.broadcast!("websocket", "new_spread", msg)
       "book-10" -> StreamHandlerWeb.Endpoint.broadcast!("websocket", "new_message", msg)
+      # Just subscribing to the ticker endpoint
+      # "ticker" -> StreamHandlerWeb.Endpoint.broadcast!("websocket", "new_ticker", msg)
       _ -> IO.puts("Ugh")
     end
   end
@@ -63,7 +65,7 @@ defmodule StreamHandler.Websocket do
     subscribe =
       Jason.encode!(%{
         "event" => "subscribe",
-        "pair" => ["XBT/USDC"],
+        "pair" => ["XBT/USD"],
         "subscription" => %{"name" => "*"}
       })
     {:reply, {:text, subscribe}, state}

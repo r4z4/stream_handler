@@ -16,7 +16,7 @@ defmodule StreamHandlerWeb.DashboardComponents do
       <%= if @activities && Enum.count(@activities) > 0 do %>
         <div class="self-center">
           <%= StreamHandlerWeb.TemplateHelpers.type_icon(@activities.type) %>
-          <p>Type: <span><%= @activities.type %></span></p>
+          <p>Type: <span><%= String.capitalize(@activities.type) %></span></p>
           <p>Activity: <span><%= @activities.activity %></span></p>
         </div>
       <% end %>
@@ -47,9 +47,9 @@ defmodule StreamHandlerWeb.DashboardComponents do
         <div class="justify-self-end"><span class="text-sm"><%= if @emojis && Enum.count(@emojis) > 0 do %>🟢<% else %>🔴<% end %></span></div>
         <%= if @emojis && Enum.count(@emojis) > 0 do %>
           <ul class="self-center">
-            <li><%= @emojis.name %></li>
-            <li><%= @emojis.category %></li>
-            <li><%= @emojis.group %></li>
+            <li><%= String.capitalize(@emojis.name) %></li>
+            <li><%= String.capitalize(@emojis.category) %></li>
+            <li><%= String.capitalize(@emojis.group) %></li>
             <li><%= @emojis.unicode %></li>
             <li><%= unicode_display(@emojis.unicode) %></li>
           </ul>
@@ -94,7 +94,7 @@ defmodule StreamHandlerWeb.DashboardComponents do
       <div class="relative flex">
         <div class="justify-self-start"><h4>Reader</h4></div>
         <div class="justify-self-end"><span class="text-xs"><%= if @reader && Enum.count(@reader) > 0 do %>🟢<% else %>🔴<% end %></span></div>
-        <div class="shrink self-center">
+        <div class="shrink justify-self-center self-center">
           <%= if @reader && Enum.count(@reader) > 0 do %>
               <p><%= @reader.string %></p>
           <% end %>
@@ -120,15 +120,19 @@ defmodule StreamHandlerWeb.DashboardComponents do
       <div class="relative flex">
         <div class="justify-self-start"><h4>Kraken</h4></div>
         <div class="justify-self-end"><span class="text-xs"><%= if @streams.messages && Enum.count(@streams.messages) > 0 do %>🟢<% else %>🔴<% end %></span></div>
-        <div id="messages" phx-update="stream" class="w-fit h-fit self-center">
-          <div :for={{dom_id, message} <- @streams.messages} id={dom_id}>
-            <p><%= message.id %> -> <%= message.data["c"] %></p>
+        <div class="justify-self-start self-center">
+          <div id="messages" phx-update="stream" class="w-fit h-fit">
+            <div :for={{dom_id, message} <- @streams.messages} id={dom_id}>
+              <p>Checksum -> <%= message.data["c"] %></p>
+            </div>
           </div>
-        </div>
 
-        <div id="spreads" phx-update="stream" class="w-fit self-center">
-          <div :for={{dom_id, message} <- @streams.spreads} id={dom_id}>
-            <p><%= message.id %> -> <%= message.data %></p>
+          <div id="spreads" phx-update="stream" class="w-fit">
+            <div :for={{dom_id, message} <- @streams.spreads} id={dom_id}>
+              <p>Bid -> <%= Enum.at(message.data, 0) %></p>
+              <p>Ask -> <%= Enum.at(message.data, 1) %></p>
+              <p>Time -> <%= Enum.at(message.data, 2) %></p>
+            </div>
           </div>
         </div>
       </div>

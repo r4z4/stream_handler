@@ -1,8 +1,8 @@
-defmodule StreamHandler.Streams.Producer do
+defmodule StreamHandler.Servers.Producer do
   use GenServer
 
   @time_interval_ms 1000
-  @call_interval_ms 7000
+  @call_interval_ms 2000
   @activities "activities"
   @aq "aq"
   @emojis "emojis"
