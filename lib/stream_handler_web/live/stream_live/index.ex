@@ -21,9 +21,9 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @spec get_class(map(), integer()) :: binary()
   def get_class(clicked_map, int) do
     if clicked_map[int] do
-      "h-56 border-green border-4 p-1"
+      "h-56 border-green border-4 p-1 flex"
     else
-      "h-56 border-black border-4 p-1"
+      "h-56 border-black border-4 p-1 flex"
     end
   end
 

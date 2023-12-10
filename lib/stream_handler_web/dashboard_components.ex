@@ -2,15 +2,23 @@ defmodule StreamHandlerWeb.DashboardComponents do
   use Phoenix.Component
   # alias Phoenix.LiveView.JS
 
+  @spec unicode_display([binary()]) :: binary()
+  def unicode_display(unicode) do
+    str = String.replace(Enum.at(unicode, 0), "U+", "\\u")
+    # List.to_string ["\x{1F54C}"]
+    List.to_string [str]
+  end
   def activities_card(assigns) do
     ~H"""
-    <div class="relative">
-      <h4>Activities</h4>
-      <div class="absolute top-0 right-0"><%= if @activities && Enum.count(@activities) > 0 do %><span class="text-xs">🟢</span><% else %>🔴<% end %></div>
+    <div class="relative flex">
+      <div class="justify-self-start"><h4>Activities</h4></div>
+      <div class="justify-self-end"><span class="text-xs"><%= if @activities && Enum.count(@activities) > 0 do %>🟢<% else %>🔴<% end %></span></div>
       <%= if @activities && Enum.count(@activities) > 0 do %>
-        <%= StreamHandlerWeb.TemplateHelpers.type_icon(@activities.type) %>
-        <p>Type: <span><%= @activities.type %></span></p>
-        <p>Activity: <span><%= @activities.activity %></span></p>
+        <div class="self-center">
+          <%= StreamHandlerWeb.TemplateHelpers.type_icon(@activities.type) %>
+          <p>Type: <span><%= @activities.type %></span></p>
+          <p>Activity: <span><%= @activities.activity %></span></p>
+        </div>
       <% end %>
     </div>
     """
@@ -18,10 +26,10 @@ defmodule StreamHandlerWeb.DashboardComponents do
 
   def slugs_card(assigns) do
     ~H"""
-    <div class="relative">
-      <h4>Slugs</h4>
-      <div class="absolute top-0 right-0"><%= if @slugs && Enum.count(@slugs) > 0 do %><span class="text-xs">🟢</span><% else %>🔴<% end %></div>
-      <ul>
+    <div class="relative flex">
+      <div class="justify-self-start"><h4>Slugs</h4></div>
+      <div class="justify-self-end"><span class="text-xs"><%= if @slugs && Enum.count(@slugs) > 0 do %>🟢<% else %>🔴<% end %></span></div>
+      <ul class="columns-2 self-center">
         <%= if @slugs && Enum.count(@slugs) > 0 do %>
           <%= for slug <- @slugs do %>
             <li><%= slug %></li>
@@ -34,15 +42,16 @@ defmodule StreamHandlerWeb.DashboardComponents do
 
   def emojis_card(assigns) do
     ~H"""
-      <div class="relative">
-        <div class="absolute top-0 left-0"><h4>Emojis</h4></div>
-        <div class="absolute top-0 right-0"><%= if @emojis && Enum.count(@emojis) > 0 do %><span class="text-sm">🟢</span><% else %>🔴<% end %></div>
+      <div class="relative flex">
+        <div class="justify-self-start"><h4>Emojis</h4></div>
+        <div class="justify-self-end"><span class="text-sm"><%= if @emojis && Enum.count(@emojis) > 0 do %>🟢<% else %>🔴<% end %></span></div>
         <%= if @emojis && Enum.count(@emojis) > 0 do %>
-          <ul>
+          <ul class="self-center">
             <li><%= @emojis.name %></li>
             <li><%= @emojis.category %></li>
             <li><%= @emojis.group %></li>
             <li><%= @emojis.unicode %></li>
+            <li><%= unicode_display(@emojis.unicode) %></li>
           </ul>
         <% end %>
       </div>
@@ -52,11 +61,11 @@ defmodule StreamHandlerWeb.DashboardComponents do
   # FIXME @ets.string
   def ets_card(assigns) do
     ~H"""
-      <div class="relative">
-        <div class="absolute top-0 left-0"><h4>ETS</h4></div>
-        <div class="absolute top-0 right-0"><%= if @ets && Enum.count(@ets) > 0 do %><span>🟢</span><% else %>🔴<% end %></div>
+      <div class="relative flex">
+        <div class="justify-self-start"><h4>ETS</h4></div>
+        <div class="justify-self-end"><span class="text-xs"><%= if @ets && Enum.count(@ets) > 0 do %>🟢<% else %>🔴<% end %></span></div>
         <%= if @ets && Enum.count(@ets) > 0 do %>
-          <table>
+          <table style="border-spacing: 10px 0; border-collapse: separate;" class="justify-center text-sm leading-3">
           <colgroup>
             <col />
             <col style="background-color: #add8e6" />
@@ -69,9 +78,9 @@ defmodule StreamHandlerWeb.DashboardComponents do
           </tr>
           <%= for score <- @ets.string do %>
             <tr>
-              <th><%= score.username %></th>
-              <th><%= score.score %></th>
-              <th><%= score.joined %></th>
+              <td><%= score.username %></td>
+              <td class="ml-4"><%= score.score %></td>
+              <td class="ml-4"><%= score.joined %></td>
             </tr>
           <% end %>
           </table>
@@ -82,10 +91,10 @@ defmodule StreamHandlerWeb.DashboardComponents do
 
   def reader_card(assigns) do
     ~H"""
-      <div class="relative">
-        <div class="absolute top-0 left-0"><h4>Reader</h4></div>
-        <div class="absolute top-0 right-0"><%= if @reader && Enum.count(@reader) > 0 do %><span>🟢</span><% else %>🔴<% end %></div>
-        <div class="shrink">
+      <div class="relative flex">
+        <div class="justify-self-start"><h4>Reader</h4></div>
+        <div class="justify-self-end"><span class="text-xs"><%= if @reader && Enum.count(@reader) > 0 do %>🟢<% else %>🔴<% end %></span></div>
+        <div class="shrink self-center">
           <%= if @reader && Enum.count(@reader) > 0 do %>
               <p><%= @reader.string %></p>
           <% end %>
@@ -96,9 +105,9 @@ defmodule StreamHandlerWeb.DashboardComponents do
 
   def images_card(assigns) do
     ~H"""
-      <div class="relative">
-        <div class="absolute top-0 left-0"><h4>Images</h4></div>
-        <div class="absolute top-0 right-0"><%= if @images && Enum.count(@images) > 0 do %><span>🟢</span><% else %>🔴<% end %></div>
+      <div class="relative flex">
+        <div class="justify-self-start"><h4>Images</h4></div>
+        <div class="justify-self-end"><span class="text-xs"><%= if @images && Enum.count(@images) > 0 do %>🟢<% else %>🔴<% end %></span></div>
         <%= if @images && Enum.count(@images) > 0 do %>
             <img width="200" height="300" src={@images.string} />
         <% end %>
@@ -108,16 +117,16 @@ defmodule StreamHandlerWeb.DashboardComponents do
 
   def kraken_card(assigns) do
     ~H"""
-      <div class="relative">
-        <div class="absolute top-0 left-0"><h4>Kraken</h4></div>
-        <div class="absolute top-0 right-0"><%= if @streams.messages do %><span>🟢</span><% else %>🔴<% end %></div>
-        <div id="messages" phx-update="stream" class="w-fit h-fit">
+      <div class="relative flex">
+        <div class="justify-self-start"><h4>Kraken</h4></div>
+        <div class="justify-self-end"><span class="text-xs"><%= if @streams.messages && Enum.count(@streams.messages) > 0 do %>🟢<% else %>🔴<% end %></span></div>
+        <div id="messages" phx-update="stream" class="w-fit h-fit self-center">
           <div :for={{dom_id, message} <- @streams.messages} id={dom_id}>
             <p><%= message.id %> -> <%= message.data["c"] %></p>
           </div>
         </div>
 
-        <div id="spreads" phx-update="stream" class="w-fit">
+        <div id="spreads" phx-update="stream" class="w-fit self-center">
           <div :for={{dom_id, message} <- @streams.spreads} id={dom_id}>
             <p><%= message.id %> -> <%= message.data %></p>
           </div>
@@ -128,9 +137,9 @@ defmodule StreamHandlerWeb.DashboardComponents do
 
   def streamer_card(assigns) do
     ~H"""
-    <div class="relative">
-      <div class="absolute top-0 left-0"><h4>Streamer</h4></div>
-      <div class="absolute top-0 right-0"><%= if @streamer_svg do %><span>🟢</span><% else %>🔴<% end %></div>
+    <div class="relative flex">
+      <div class="justify-self-start"><h4>Streamer</h4></div>
+      <div class="justify-self-end"><span class="text-xs"><%= if @streamer_svg do %>🟢<% else %>🔴<% end %></span></div>
       <svg viewBox="0 0 56 18">
         <%= if @streamer_svg do %><%= @streamer_svg %><% end %>
       </svg>

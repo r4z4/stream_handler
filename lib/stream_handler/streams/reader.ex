@@ -122,7 +122,7 @@ defmodule StreamHandler.Streams.Reader do
   @impl true
   def handle_info(:images, state) do
     IO.puts "Handle Images"
-    files = Path.wildcard("./priv/static/images/*")
+    files = Path.wildcard("./priv/static/images/ava/*")
     file = Enum.random(files)
     new_path = String.replace(file, "priv/static", "")
     publish_str(@images, new_path)

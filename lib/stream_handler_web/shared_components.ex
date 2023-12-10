@@ -11,7 +11,7 @@ defmodule StreamHandlerWeb.SharedComponents do
   def button_card(assigns) do
     ~H"""
     <div class="grid grid-cols-3 gap-4 w-full">
-      <div>
+      <div class="basis-1/4 flex flex-col items-center justify-center">
         <button
           type="button"
           phx-click="service_casted"
@@ -21,7 +21,7 @@ defmodule StreamHandlerWeb.SharedComponents do
         ><%= if @clicked_map && @clicked_map[1] do %>Stop Slugs<% else %>Start Slugs<% end %>
         </button>
       </div>
-      <div>
+      <div class="basis-1/4 flex flex-col items-center justify-center">
         <button
           type="button"
           phx-click="service_casted"
@@ -31,7 +31,7 @@ defmodule StreamHandlerWeb.SharedComponents do
         ><%= if @clicked_map && @clicked_map[2] do %>Stop Emojis<% else %>Start Emojis<% end %>
         </button>
       </div>
-      <div>
+      <div class="basis-1/4 flex flex-col items-center justify-center">
         <button
           type="button"
           phx-click="service_casted"
@@ -41,7 +41,7 @@ defmodule StreamHandlerWeb.SharedComponents do
         ><%= if @clicked_map && @clicked_map[3] do %>Stop Activities<% else %>Start Activities<% end %>
         </button>
       </div>
-      <div>
+      <div class="basis-1/4 flex flex-col items-center justify-center">
         <button
           type="button"
           phx-click="service_casted"
@@ -51,7 +51,7 @@ defmodule StreamHandlerWeb.SharedComponents do
         ><%= if @clicked_map && @clicked_map[4] do %>Stop WS<% else %>Start WS<% end %>
         </button>
       </div>
-      <div>
+      <div class="basis-1/4 flex flex-col items-center justify-center">
         <button
           type="button"
           phx-click="service_casted"
@@ -61,7 +61,7 @@ defmodule StreamHandlerWeb.SharedComponents do
         ><%= if @clicked_map && @clicked_map[5] do %>Stop All Services<% else %>Start All Services<% end %>
         </button>
       </div>
-      <div>
+      <div class="basis-1/4 flex flex-col items-center justify-center">
         <button
           type="button"
           phx-click="service_casted"
@@ -71,17 +71,17 @@ defmodule StreamHandlerWeb.SharedComponents do
         ><%= if @clicked_map && @clicked_map[6] do %>Stop Leaderboard<% else %>Start Leaderboard<% end %>
         </button>
       </div>
-      <div>
+      <div class="basis-1/4 flex flex-col items-center justify-center">
         <button
           type="button"
           phx-click="service_casted"
           phx-value-id={if @clicked_map && @clicked_map[7] do 16 else 7 end}
           value={"streamer"}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
-        ><%= if @clicked_map && @clicked_map[6] do %>Stop Streamer<% else %>Start Streamer<% end %>
+        ><%= if @clicked_map && @clicked_map[7] do %>Stop Streamer<% else %>Start Streamer<% end %>
         </button>
       </div>
-      <div>
+      <div class="basis-1/4 flex flex-col items-center justify-center">
         <button
           type="button"
           phx-click="service_casted"
@@ -91,7 +91,7 @@ defmodule StreamHandlerWeb.SharedComponents do
         ><%= if @clicked_map && @clicked_map[8] do %>Stop Reader<% else %>Start Reader<% end %>
         </button>
       </div>
-      <div>
+      <div class="basis-1/4 flex flex-col items-center justify-center">
         <button
           type="button"
           phx-click="service_casted"

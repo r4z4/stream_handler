@@ -62,7 +62,7 @@ defmodule StreamHandler.Servers.Streamer do
     plot = Plot.new(300, 200, point_plot)
       |> Plot.plot_options(%{legend_setting: :legend_right})
       |> Plot.titles("Stream Data Plot", "Property Testing & Data Streaming")
-      |> Plot.axis_labels("x", "y")
+      # |> Plot.axis_labels("x", "y")
 
     Plot.to_svg(plot)
   end
