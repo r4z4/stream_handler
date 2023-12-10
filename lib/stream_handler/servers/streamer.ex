@@ -24,6 +24,17 @@ defmodule StreamHandler.Servers.Streamer do
   end
 
   @impl true
+  def handle_cast({:stop_resource, sym}, state) do
+    case sym do
+      :streamer -> Process.cancel_timer(state.streamer_ref)
+      _ -> Process.cancel_timer(state.streamer_ref)
+    end
+    # Process.cancel_timer(self(), sym, @time_interval_ms)
+    IO.puts(sym)
+    {:noreply, state}
+  end
+
+  @impl true
   def init(state) do
     # _table = :ets.new(:user_scores, [:ordered_set, :protected, :named_table])
     IO.inspect state, label: "init"
@@ -48,9 +59,10 @@ defmodule StreamHandler.Servers.Streamer do
     data = generate_data()
     ds = Dataset.new(data, ["x", "y"])
     point_plot = PointPlot.new(ds)
-    plot = Plot.new(600, 400, point_plot)
+    plot = Plot.new(300, 200, point_plot)
       |> Plot.plot_options(%{legend_setting: :legend_right})
       |> Plot.titles("Stream Data Plot", "Property Testing & Data Streaming")
+      |> Plot.axis_labels("x", "y")
 
     Plot.to_svg(plot)
   end

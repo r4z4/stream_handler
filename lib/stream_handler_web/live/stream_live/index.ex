@@ -17,6 +17,16 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @streamer "streamer"
   @images "images"
 
+  # string() refers to Erlang strings. != Elixir strings.
+  @spec get_class(map(), integer()) :: binary()
+  def get_class(clicked_map, int) do
+    if clicked_map[int] do
+      "h-56 border-green border-4 p-1"
+    else
+      "h-56 border-black border-4 p-1"
+    end
+  end
+
   @impl true
   def handle_call(:ping, _from, state) do
     {:reply, {:pong, state[:id]}, state}
@@ -99,7 +109,16 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         x when x in 10..18 -> x - 9
         _ -> 0
       end
-    adjusted_map = Map.put(clicked_map, map_int, !clicked_map[map_int])
+    IO.inspect(map_int, label: "MAP _______ INT")
+    # Match on int, not map_int
+    adjusted_map =
+      case int do
+        # Simulate ALL clicked. Map.replace return a [%{old}, %{new}]
+        5   -> %{1 => true, 2 => true, 3 => true, 4 => true, 5 => true, 6 => true, 7 => true, 8 => true, 9 => true}
+        14  -> %{1 => false, 2 => false, 3 => false, 4 => false, 5 => false, 6 => false, 7 => false, 8 => false, 9 => false}
+        _   -> Map.put(clicked_map, map_int, !clicked_map[map_int])
+      end
+    IO.inspect(adjusted_map, label: "Adjusted ____________ Map")
     case params["id"] do
       # Num + 9 is the Key for Stopping Service (for now)
       "1" ->
@@ -127,32 +146,36 @@ defmodule StreamHandlerWeb.StreamLive.Index do
 
       "4" ->
         IO.puts "WebSockex Casted"
+        # Use start and not start_link to avoid being alerted when we close conn
         StreamHandler.Websocket.start(:hey)
-        # GenServer.cast :consumer_3, {:fetch_resource, :custom_event}
-        # GenServer.cast :consumer_1, {:add, %{name: "Pumpkin", price: 3}}
-        # GenServer.cast :consumer_2, {:add, %{name: "Cherry", price: 3}}
-        # GenServer.cast :consumer_3, {:add, %{name: "Blueberry", price: 3}}
-        # GenServer.cast :consumer_4, {:add, %{name: "Pecan", price: 3}}
       "13" ->
         IO.puts "WebSockex Stopped"
         WebSockex.cast :kraken, {:stop_resource, :ws}
 
       "5" ->
         IO.puts "Casting All Services"
+        # GenServers
         GenServer.cast :reader,     {:fetch_resource, :reader}
         GenServer.cast :reader,     {:fetch_resource, :images}
+        GenServer.cast :reader,     {:fetch_resource, :ets}
+        GenServer.cast :streamer,   {:fetch_resource, :streamer}
         GenServer.cast :consumer_2, {:fetch_resource, :emojis}
         GenServer.cast :consumer_1, {:fetch_resource, :slugs}
-        GenServer.cast :reader,     {:fetch_resource, :ets}
         GenServer.cast :consumer_4, {:fetch_resource, :activities}
+        # Websockex
+        StreamHandler.Websocket.start(:hey)
       "14" ->
         IO.puts "Stopping All Services"
+        # GenServers
         GenServer.cast :reader,     {:stop_resource, :reader}
         GenServer.cast :reader,     {:stop_resource, :images}
+        GenServer.cast :reader,     {:stop_resource, :ets}
+        GenServer.cast :streamer,   {:stop_resource, :streamer}
         GenServer.cast :consumer_2, {:stop_resource, :emojis}
         GenServer.cast :consumer_1, {:stop_resource, :slugs}
-        GenServer.cast :reader,     {:stop_resource, :ets}
         GenServer.cast :consumer_4, {:stop_resource, :activities}
+        # Websockex
+        WebSockex.cast :kraken, {:stop_resource, :ws}
 
       "6" ->
         IO.puts "Leaderboard Casted"
@@ -181,6 +204,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       "18" ->
         IO.puts "Images Stopped"
         GenServer.cast :reader, {:stop_resource, :images}
+
       _ ->
         IO.puts "No Service Casted"
     end

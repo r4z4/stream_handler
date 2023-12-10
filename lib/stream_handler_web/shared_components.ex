@@ -56,7 +56,7 @@ defmodule StreamHandlerWeb.SharedComponents do
           type="button"
           phx-click="service_casted"
           phx-value-id={if @clicked_map && @clicked_map[5] do 14 else 5 end}
-          value={5}
+          value={"all"}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
         ><%= if @clicked_map && @clicked_map[5] do %>Stop All Services<% else %>Start All Services<% end %>
         </button>

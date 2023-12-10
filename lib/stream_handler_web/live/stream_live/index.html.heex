@@ -1,21 +1,21 @@
 <.header>
   Listing
 </.header>
-  <div class="grid grid-cols-3 gap-2 w-full">
+  <div class="grid grid-cols-3 gap-2 w-full place-items-stretch">
 
-    <div class="h-56 border-black border-4 p-8">
+    <div class={get_class(@clicked_map, 1)}>
       <StreamHandlerWeb.DashboardComponents.slugs_card slugs={@slugs} />
     </div>
 
-    <div class="h-56 border-black border-4 p-8">
+    <div class={get_class(@clicked_map, 2)}>
       <StreamHandlerWeb.DashboardComponents.emojis_card emojis={@emojis} />
     </div>
 
-    <div class="h-56 border-black border-4 p-8">
+    <div class={get_class(@clicked_map, 3)}>
       <StreamHandlerWeb.DashboardComponents.activities_card activities={@activities} />
     </div>
 
-    <div class="h-56 border-black border-4 p-8">
+    <div class={get_class(@clicked_map, 4)}>
       <StreamHandlerWeb.DashboardComponents.kraken_card streams={@streams} />
     </div>
 
@@ -23,19 +23,19 @@
       <StreamHandlerWeb.SharedComponents.button_card clicked_map={@clicked_map} />
     </div>
   
-    <div class="h-56 border-black border-4 p-8">
+    <div class={get_class(@clicked_map, 6)}>
       <StreamHandlerWeb.DashboardComponents.ets_card ets={@ets} />
     </div>
 
-    <div class="h-56 border-black border-4 p-8">
+    <div class={get_class(@clicked_map, 7)}>
       <StreamHandlerWeb.DashboardComponents.streamer_card streamer_svg={@streamer_svg} />
     </div>
 
-    <div class="h-56 border-black border-4 p-8">
+    <div class={get_class(@clicked_map, 8)}>
       <StreamHandlerWeb.DashboardComponents.reader_card reader={@reader} />
     </div>
     
-    <div class="h-56 border-black border-4 p-8">
+    <div class={get_class(@clicked_map, 9)}>
       <StreamHandlerWeb.DashboardComponents.images_card images={@images} />
     </div>
 
