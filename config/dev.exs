@@ -26,7 +26,8 @@ config :stream_handler, StreamHandlerWeb.Endpoint,
   secret_key_base: "GG6NC1GRc0uW/Jq05V54MCqXfItDKqIQ0vKZpiLXqMgmAJasViU/f+D/lWJbfvH3",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]},
+    node: ["esbuild.js", "--watch", cd: Path.expand("../assets", __DIR__)]
   ]
 
 # ## SSL Support
