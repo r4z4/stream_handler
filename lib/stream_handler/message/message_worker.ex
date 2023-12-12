@@ -32,7 +32,7 @@ defmodule StreamHandler.Message.MessageWorker do
   def init(state) do
     # _table = :ets.new(:user_scores, [:ordered_set, :protected, :named_table])
     IO.inspect state, label: "init"
-    refs_map = %{task_ref: nil, transcription: nil, ner_ref: nil, ner: nil, ner_pred: nil}
+    refs_map = %{transcribe_ref: nil, transcription: nil, ner_ref: nil, ner: nil, ner_pred: nil}
     {:ok, refs_map}
   end
 
@@ -49,11 +49,12 @@ defmodule StreamHandler.Message.MessageWorker do
     file_name = path |> Path.basename() |> String.split(".") |> Enum.at(0)
     old_ext = path |> Path.basename() |> String.split(".") |> Enum.at(1)
     new_path = String.replace(path, old_ext, "pcm")
-    System.shell("ffmpeg -t 30 -i #{path} -f f32le -acodec pcm_f32le -ac 1 -ar 16000 -vn #{new_path}")
+    # System.shell("ffmpeg -y -t 30 -i #{path} -f f32le -acodec pcm_f32le -ac 1 -ar 16000 -vn #{new_path}")
+    System.shell("ffmpeg -y -i #{path} -f f32le -acodec pcm_f32le -ac 1 -ar 16000 -vn #{new_path}")
   end
 
   @impl true
-  def handle_cast({:task, path}, state) do
+  def handle_cast({:ner_pipeline, path}, state) do
     IO.puts "Received Cast --> Path: #{path}"
     convert_file(path)
     old_ext = path |> Path.basename() |> String.split(".") |> Enum.at(1)
@@ -64,9 +65,9 @@ defmodule StreamHandler.Message.MessageWorker do
     # We always pre-process audio on the client into a single channel
     audio = Nx.from_binary(binary, :f32)
     IO.inspect(audio, label: "audio")
-    task = Task.async(fn -> Nx.Serving.batched_run(StreamHandler.Serving, audio) end)
-    IO.inspect(task, label: "Task")
-    state = Map.put(state, :task_ref, task)
+    transcribe_task = Task.async(fn -> Nx.Serving.batched_run(StreamHandler.Serving, audio) end)
+    IO.inspect(transcribe_task, label: "Transcribe Task")
+    state = Map.put(state, :transcribe_ref, transcribe_task)
     {:noreply, state}
   end
 
@@ -79,26 +80,37 @@ defmodule StreamHandler.Message.MessageWorker do
     {:noreply, socket}
   end
 
-  def handle_info(:ner, state) do
-    task = Task.async(fn -> Nx.Serving.batched_run(StreamHandler.TextClassificationServing, state.transcription) end)
+  def handle_cast({:ner, text}, state) do
+    task = Task.async(fn -> Nx.Serving.batched_run(StreamHandler.TextClassificationServing, text) end)
     state = Map.put(state, :ner_ref, task)
     {:noreply, state}
   end
 
+  defp handle_progress(:audio, entry, socket) when entry.done? do
+    IO.puts "Progress Audio"
+    {:noreply, socket}
+  end
+
+  defp handle_progress(_, _, socket) do
+    IO.puts "Progress"
+    {:noreply, socket}
+  end
+
   @impl true
-  def handle_info({ref, result}, state) when state.task_ref.ref == ref do
-    IO.inspect(ref, label: "Ref")
+  def handle_info({ref, result}, state) when state.transcribe_ref.ref == ref do
+    IO.inspect(ref, label: "Transcribe Ref")
     Process.demonitor(ref, [:flush])
     %{chunks: [%{text: text, start_timestamp_seconds: _, end_timestamp_seconds: _}]} = result
     IO.inspect(text, label: "Bumblebee Text")
-    Process.send(self(), :ner, [])
+    File.write("./files/audio_output.txt", text)
+    GenServer.cast :b, {:ner, text}
     state = Map.put(state, :transcription, text)
     {:noreply, state}
   end
 
   @impl true
   def handle_info({ref, result}, state) when state.ner_ref.ref == ref do
-    IO.inspect(ref, label: "Ref")
+    IO.inspect(ref, label: "Ner Ref")
     Process.demonitor(ref, [:flush])
     # Just a single record but it does return a list
     # %{entities: [%{label: label, start: _start, end: _end, phrase: phrase, score: score}]} = result
