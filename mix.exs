@@ -54,7 +54,15 @@ defmodule StreamHandler.MixProject do
       {:websockex, "~> 0.4.3"},
       {:logger_file_backend, "~> 0.0.10"},
       {:stream_data, "~> 0.5"},
-      {:contex, "~> 0.5.0"}
+      {:bumblebee, "~> 0.4.2"},
+      {:nx, "~> 0.6.4"},
+      {:exla, "~> 0.6.1"},
+      {:contex, "~> 0.5.0"},
+      {:membrane_core, "~> 1.0.0"},
+      {:membrane_portaudio_plugin, "~> 0.18.2"},
+      {:membrane_hackney_plugin, "~> 0.11.0"},
+      {:membrane_ffmpeg_swresample_plugin, "~> 0.19.0"},
+      {:membrane_mp3_mad_plugin, "~> 0.18.1"}
     ]
   end
 
