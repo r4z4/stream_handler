@@ -29,6 +29,10 @@ config :stream_handler, StreamHandlerWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :stream_handler, StreamHandler.Mailer, adapter: Swoosh.Adapters.Local
 
+config :mime, :types, %{
+  "audio/x-m4a" => ["m4a"]
+}
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",

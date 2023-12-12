@@ -73,6 +73,9 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       |> assign(:number, 0)
       |> assign(:text_3, "Number Three")
       |> assign(:number_3, 3)
+
+      |> assign(:uploaded_files, [])
+      |> allow_upload(:avatar, accept: ~w(.mp3 .m4a), max_entries: 2)
     }
   end
 
@@ -376,5 +379,32 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         socket
         |> stream_insert(:tickers, new_message)}
   end
+
+  @impl Phoenix.LiveView
+  def handle_event("validate", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("cancel-upload", %{"ref" => ref}, socket) do
+    {:noreply, cancel_upload(socket, :avatar, ref)}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("save", _params, socket) do
+    uploaded_files =
+      consume_uploaded_entries(socket, :avatar, fn %{path: path}, _entry ->
+        # dest = Path.join([:code.priv_dir(:stream_handler), "static", "uploads", Path.basename(path)])
+        dest = Path.join(["./files/uploads", Path.basename(path)])
+        File.cp!(path, dest)
+        {:ok, ~p"/uploads/#{Path.basename(dest)}"}
+      end)
+
+    {:noreply, update(socket, :uploaded_files, &(&1 ++ uploaded_files))}
+  end
+
+  defp error_to_string(:too_large), do: "Too large"
+  defp error_to_string(:too_many_files), do: "You have selected too many files"
+  defp error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
 
 end
