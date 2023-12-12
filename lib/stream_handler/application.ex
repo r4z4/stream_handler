@@ -18,6 +18,18 @@ defmodule StreamHandler.Application do
         # max_new_tokens: 100,
         defn_options: [compiler: EXLA]
       )
+
+    {:ok, tc_model} = Bumblebee.load_model({:hf, "dslim/bert-base-NER"})
+    {:ok, tc_tokenizer} = Bumblebee.load_tokenizer({:hf, "bert-base-cased"})
+
+    text_classification_serving =
+      Bumblebee.Text.token_classification(
+        tc_model,
+        tc_tokenizer,
+        aggregation: :same,
+        defn_options: [compiler: EXLA]
+      )
+
     # # Listen for our stream heavy app, the repo module, and any type of queries
     # :ok = :telemetry.attach("sh-repo-handler", [:stream_heavy, :repo, :query], &StreamHeavy.Telemetry.handle_event/4, %{})
     # :ok = :telemetry.attach("ecto-logger", [:stream_heavy, :repo, :query], &StreamHeavy.EctoLogger.handle_event/4, %{})
@@ -35,6 +47,7 @@ defmodule StreamHandler.Application do
       # Start the Endpoint (http/https)
       StreamHandlerWeb.Endpoint,
       {Nx.Serving, serving: serving, name: StreamHandler.Serving, batch_timeout: 100},
+      {Nx.Serving, serving: text_classification_serving, name: StreamHandler.TextClassificationServing},
       Supervisor.child_spec({StreamHandler.Servers.Producer, [:consumer_1, []]}, id: :consumer_1),
       Supervisor.child_spec({StreamHandler.Servers.Producer, [:consumer_2, []]}, id: :consumer_2),
       Supervisor.child_spec({StreamHandler.Servers.Producer, [:consumer_3, []]}, id: :consumer_3),

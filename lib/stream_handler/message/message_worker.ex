@@ -32,7 +32,7 @@ defmodule StreamHandler.Message.MessageWorker do
   def init(state) do
     # _table = :ets.new(:user_scores, [:ordered_set, :protected, :named_table])
     IO.inspect state, label: "init"
-    refs_map = %{task_ref: nil, transcription: nil}
+    refs_map = %{task_ref: nil, transcription: nil, ner_ref: nil, ner: nil, ner_pred: nil}
     {:ok, refs_map}
   end
 
@@ -72,12 +72,17 @@ defmodule StreamHandler.Message.MessageWorker do
 
   defp handle_progress(_name, _entry, socket), do: {:noreply, socket}
 
-  @impl true
   def handle_event("noop", %{}, socket) do
     # We need phx-change and phx-submit on the form for live uploads,
     # but we make predictions immediately using :progress, so we just
     # ignore this event
     {:noreply, socket}
+  end
+
+  def handle_info(:ner, state) do
+    task = Task.async(fn -> Nx.Serving.batched_run(StreamHandler.TextClassificationServing, state.transcription) end)
+    state = Map.put(state, :ner_ref, task)
+    {:noreply, state}
   end
 
   @impl true
@@ -86,7 +91,23 @@ defmodule StreamHandler.Message.MessageWorker do
     Process.demonitor(ref, [:flush])
     %{chunks: [%{text: text, start_timestamp_seconds: _, end_timestamp_seconds: _}]} = result
     IO.inspect(text, label: "Bumblebee Text")
+    Process.send(self(), :ner, [])
     state = Map.put(state, :transcription, text)
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info({ref, result}, state) when state.ner_ref.ref == ref do
+    IO.inspect(ref, label: "Ref")
+    Process.demonitor(ref, [:flush])
+    # Just a single record but it does return a list
+    # %{entities: [%{label: label, start: _start, end: _end, phrase: phrase, score: score}]} = result
+    %{entities: entity_list} = result
+    for %{label: label, start: _start, end: _end, phrase: phrase, score: score} <- entity_list do
+      prediction = %{label: label, entity: phrase, score: score}
+      IO.puts "It predicted a #{prediction.label} of #{prediction.entity}"
+    end
+    state = Map.put(state, :ner_pred, entity_list)
     {:noreply, state}
   end
 

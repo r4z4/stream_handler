@@ -124,7 +124,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       # Num + 9 is the Key for Stopping Service (for now)
       "1" ->
         IO.puts "Slugs Casted"
-        test_file = "./files/audio/pete.mp3"
+        test_file = "./files/audio/entities.mp3"
         # StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic_4, "test_message", [])
         # GenServer.cast :consumer_1, {:fetch_resource, :slugs}
         GenServer.cast :a, {:task, test_file}
