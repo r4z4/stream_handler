@@ -46,21 +46,34 @@ defmodule StreamHandler.Message.MessageWorker do
   end
 
   def convert_file(path) do
-    file_name = path |> Path.basename() |> String.split(".") |> Enum.at(0)
-    old_ext = path |> Path.basename() |> String.split(".") |> Enum.at(1)
-    new_path = String.replace(path, old_ext, "pcm")
-    # System.shell("ffmpeg -y -t 30 -i #{path} -f f32le -acodec pcm_f32le -ac 1 -ar 16000 -vn #{new_path}")
-    System.shell("ffmpeg -y -i #{path} -f f32le -acodec pcm_f32le -ac 1 -ar 16000 -vn #{new_path}")
+    case String.contains? path, "." do
+      true ->
+        file_name = path |> Path.basename() |> String.split(".") |> Enum.at(0)
+        # old_ext = path |> Path.basename() |> String.split(".") |> Enum.at(1)
+        # new_path = String.replace(path, old_ext, "pcm")
+        new_path = "./files/audio/conversions/" <> file_name <> ".pcm"
+        # System.shell("ffmpeg -y -t 30 -i #{path} -f f32le -acodec pcm_f32le -ac 1 -ar 16000 -vn #{new_path}")
+        System.shell("ffmpeg -y -i #{path} -f f32le -acodec pcm_f32le -ac 1 -ar 16000 -vn #{new_path}")
+      false ->
+        file_name = path |> Path.basename() |> String.split(".") |> Enum.at(0)
+        # old_ext = path |> Path.basename() |> String.split(".") |> Enum.at(1)
+        cur_path = "./files" <> path
+        new_path = "./files/audio/conversions/" <> file_name <> ".pcm"
+        # System.shell("ffmpeg -y -t 30 -i #{path} -f f32le -acodec pcm_f32le -ac 1 -ar 16000 -vn #{new_path}")
+        System.shell("ffmpeg -y -i #{cur_path} -f f32le -acodec pcm_f32le -ac 1 -ar 16000 -vn #{new_path}")
+    end
   end
 
   @impl true
   def handle_cast({:ner_pipeline, path}, state) do
     IO.puts "Received Cast --> Path: #{path}"
     convert_file(path)
-    old_ext = path |> Path.basename() |> String.split(".") |> Enum.at(1)
-    new_ext = "pcm"
-    new_path = String.replace(path, old_ext, new_ext)
-    binary = File.read!(new_path)
+    file_name = path |> Path.basename() |> String.split(".") |> Enum.at(0)
+    # old_ext = path |> Path.basename() |> String.split(".") |> Enum.at(1)
+    # new_ext = "pcm"
+    # new_path = String.replace(path, old_ext, new_ext)
+    path = "./files/audio/conversions/" <> file_name <> ".pcm"
+    binary = File.read!(path)
     # binary = <<12.2,14.4,15.3,2.2,3.3,4.5,14.4,15.3,2.2,3.3,4.5,14.4,15.3,2.2,3.3,4.5,14.4,15.3,2.2,3.3,4.5>>
     # We always pre-process audio on the client into a single channel
     audio = Nx.from_binary(binary, :f32)
@@ -100,7 +113,9 @@ defmodule StreamHandler.Message.MessageWorker do
   def handle_info({ref, result}, state) when state.transcribe_ref.ref == ref do
     IO.inspect(ref, label: "Transcribe Ref")
     Process.demonitor(ref, [:flush])
-    %{chunks: [%{text: text, start_timestamp_seconds: _, end_timestamp_seconds: _}]} = result
+    %{chunks: chunk_list} = result
+    text = chunk_list |> Enum.map_join(& &1.text) |> String.trim()
+    # %{chunks: [%{text: text, start_timestamp_seconds: _, end_timestamp_seconds: _}]} = result
     IO.inspect(text, label: "Bumblebee Text")
     File.write("./files/audio_output.txt", text)
     GenServer.cast :b, {:ner, text}

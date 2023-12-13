@@ -127,7 +127,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       # Num + 9 is the Key for Stopping Service (for now)
       "1" ->
         IO.puts "Slugs Casted"
-        test_file = "./files/audio/cassandra_casserole.m4a"
+        test_file = "./files/audio/one_min_five.m4a"
         # StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic_4, "test_message", [])
         # GenServer.cast :consumer_1, {:fetch_resource, :slugs}
         GenServer.cast :a, {:ner_pipeline, test_file}
@@ -394,11 +394,23 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   def handle_event("save", _params, socket) do
     uploaded_files =
       consume_uploaded_entries(socket, :avatar, fn %{path: path}, _entry ->
+        IO.inspect(Path.extname(path), label: "Path")
+        # Actually might not even need this
+        # ext =
+        #   case ExMarcel.MimeType.for {:path, path} do
+        #     "video/mp4" -> ".m4a"
+        #     "audio/mp3" -> ".mp3"
+        #     _           -> ""
+        #   end
         # dest = Path.join([:code.priv_dir(:stream_handler), "static", "uploads", Path.basename(path)])
+        # FIXME use ExMarcel to detect MIME type
         dest = Path.join(["./files/uploads", Path.basename(path)])
         File.cp!(path, dest)
         {:ok, ~p"/uploads/#{Path.basename(dest)}"}
       end)
+
+    # Files now ready to be transcribed.
+    GenServer.cast :a, {:ner_pipeline, Enum.at(uploaded_files, 0)}
 
     {:noreply, update(socket, :uploaded_files, &(&1 ++ uploaded_files))}
   end

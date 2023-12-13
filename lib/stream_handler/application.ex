@@ -16,7 +16,10 @@ defmodule StreamHandler.Application do
     serving =
       Bumblebee.Audio.speech_to_text_whisper(model_info, featurizer, tokenizer, generation_config,
         # max_new_tokens: 100,
-        defn_options: [compiler: EXLA]
+        defn_options: [compiler: EXLA],
+        # stream: true,
+        chunk_num_seconds: 30,
+        timestamps: :segments
       )
 
     {:ok, tc_model} = Bumblebee.load_model({:hf, "dslim/bert-base-NER"})
@@ -38,6 +41,7 @@ defmodule StreamHandler.Application do
       StreamHandlerWeb.Telemetry,
       # Start the Ecto repository
       StreamHandler.Repo,
+      ExMarcel.TableWrapper,
       # StreamHandler.FinnhubClient,
       # StreamHandler.Servers.Websocket,
       # Start the PubSub system

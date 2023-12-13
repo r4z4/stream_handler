@@ -62,7 +62,8 @@ defmodule StreamHandler.MixProject do
       {:membrane_portaudio_plugin, "~> 0.18.2"},
       {:membrane_hackney_plugin, "~> 0.11.0"},
       {:membrane_ffmpeg_swresample_plugin, "~> 0.19.0"},
-      {:membrane_mp3_mad_plugin, "~> 0.18.1"}
+      {:membrane_mp3_mad_plugin, "~> 0.18.1"},
+      {:ex_marcel, "~> 0.1.0"}
     ]
   end
 
