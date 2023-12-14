@@ -51,10 +51,21 @@ config :tailwind,
     cd: Path.expand("../assets", __DIR__)
   ]
 
+config :sentry,
+  dsn: System.get_env("SENTRY_DSN"),
+  environment_name: Mix.env(),
+  included_environments: [:prod],
+  enable_source_code_context: true,
+  # 8.x
+  root_source_code_paths: [File.cwd!()]
+
 # Configures Elixir's Logger
-config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+config :logger,
+  backends: [Sentry.LoggerBackend, :console]
+
+# config :logger, Sentry.LoggerBackend,
+#   format: "$time $metadata[$level] $message\n",
+#   metadata: [:request_id]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason

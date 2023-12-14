@@ -144,9 +144,7 @@ defmodule StreamHandlerWeb.DashboardComponents do
     <div class="relative flex">
       <div class="justify-self-start"><h4>Streamer</h4></div>
       <div class="justify-self-end"><span class="text-xs"><%= if @streamer_svg do %>🟢<% else %>🔴<% end %></span></div>
-      <svg viewBox="0 0 56 18">
         <%= if @streamer_svg do %><%= @streamer_svg %><% end %>
-      </svg>
     </div>
     """
   end

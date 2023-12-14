@@ -15,6 +15,9 @@ defmodule StreamHandlerWeb.SharedComponents do
         <button
           type="button"
           phx-click="service_casted"
+          phx-value-op={if @clicked_map && @clicked_map[1] do :stop_resource else :fetch_resource end}
+          phx-value-res={:slugs}
+          phx-value-castto={:consumer_1}
           phx-value-id={if @clicked_map && @clicked_map[1] do 10 else 1 end}
           value={1}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
@@ -25,6 +28,9 @@ defmodule StreamHandlerWeb.SharedComponents do
         <button
           type="button"
           phx-click="service_casted"
+          phx-value-op={if @clicked_map && @clicked_map[2] do :stop_resource else :fetch_resource end}
+          phx-value-res={:emojis}
+          phx-value-castto={:consumer_2}
           phx-value-id={if @clicked_map && @clicked_map[2] do 11 else 2 end}
           value={2}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
@@ -35,6 +41,9 @@ defmodule StreamHandlerWeb.SharedComponents do
         <button
           type="button"
           phx-click="service_casted"
+          phx-value-op={if @clicked_map && @clicked_map[3] do :stop_resource else :fetch_resource end}
+          phx-value-res={:activities}
+          phx-value-castto={:consumer_4}
           phx-value-id={if @clicked_map && @clicked_map[3] do 12 else 3 end}
           value={3}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
@@ -65,6 +74,9 @@ defmodule StreamHandlerWeb.SharedComponents do
         <button
           type="button"
           phx-click="service_casted"
+          phx-value-op={if @clicked_map && @clicked_map[6] do :stop_resource else :fetch_resource end}
+          phx-value-res={:ets}
+          phx-value-castto={:reader}
           phx-value-id={if @clicked_map && @clicked_map[6] do 15 else 6 end}
           value={6}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
@@ -75,6 +87,9 @@ defmodule StreamHandlerWeb.SharedComponents do
         <button
           type="button"
           phx-click="service_casted"
+          phx-value-op={if @clicked_map && @clicked_map[7] do :stop_resource else :fetch_resource end}
+          phx-value-res={:streamer}
+          phx-value-castto={:streamer}
           phx-value-id={if @clicked_map && @clicked_map[7] do 16 else 7 end}
           value={"streamer"}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
@@ -85,6 +100,9 @@ defmodule StreamHandlerWeb.SharedComponents do
         <button
           type="button"
           phx-click="service_casted"
+          phx-value-op={if @clicked_map && @clicked_map[8] do :stop_resource else :fetch_resource end}
+          phx-value-res={:reader}
+          phx-value-castto={:reader}
           phx-value-id={if @clicked_map && @clicked_map[8] do 17 else 8 end}
           value={"reader"}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
@@ -95,6 +113,9 @@ defmodule StreamHandlerWeb.SharedComponents do
         <button
           type="button"
           phx-click="service_casted"
+          phx-value-op={if @clicked_map && @clicked_map[9] do :stop_resource else :fetch_resource end}
+          phx-value-res={:Images}
+          phx-value-castto={:reader}
           phx-value-id={if @clicked_map && @clicked_map[9] do 18 else 9 end}
           value={"Images"}
           class="inline-block rounded border-2 border-success w-3/3 px-2 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-success transition duration-150 ease-in-out hover:border-success-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-success-600 focus:border-success-600 focus:text-success-600 focus:outline-none focus:ring-0 active:border-success-700 active:text-success-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
