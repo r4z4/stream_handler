@@ -1,8 +1,6 @@
 defmodule StreamHandler.Servers.Streamer do
   use GenServer
   alias Contex.{PointPlot, Plot, Dataset}
-  alias StreamHandler.Repo
-  alias StreamHandler.Streams.UserScore
 
   @time_interval_ms 2000
   @call_interval_ms 3000

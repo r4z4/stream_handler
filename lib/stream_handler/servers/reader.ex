@@ -63,13 +63,13 @@ defmodule StreamHandler.Servers.Reader do
     end)
   end
 
-  defp publish({line, index}) do
-    Phoenix.PubSub.broadcast(
-      StreamHandler.PubSub,
-      @reader,
-      %{topic: @reader, payload: %{status: :complete, string: "#{index + 1} #{line}"}}
-    )
-  end
+  # defp publish({line, index}) do
+  #   Phoenix.PubSub.broadcast(
+  #     StreamHandler.PubSub,
+  #     @reader,
+  #     %{topic: @reader, payload: %{status: :complete, string: "#{index + 1} #{line}"}}
+  #   )
+  # end
 
   defp publish_str(at, str) do
     Phoenix.PubSub.broadcast(

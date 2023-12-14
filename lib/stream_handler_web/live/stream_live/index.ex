@@ -75,7 +75,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       |> assign(:number_3, 3)
 
       |> assign(:uploaded_files, [])
-      |> allow_upload(:avatar, accept: ~w(.mp3 .m4a), max_entries: 2)
+      |> allow_upload(:avatar, accept: ~w(.mp3 .m4a), max_entries: 5)
     }
   end
 
@@ -225,6 +225,49 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     {:ok, _} = Streams.delete_stream(stream)
 
     {:noreply, stream_delete(socket, :stream_collection, stream)}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("cancel-upload", %{"ref" => ref}, socket) do
+    {:noreply, cancel_upload(socket, :avatar, ref)}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("validate", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("save", _params, socket) do
+    uploaded_files =
+      consume_uploaded_entries(socket, :avatar, fn %{path: path}, _entry ->
+        IO.inspect(Path.extname(path), label: "Path")
+        # Actually might not even need this
+        # ext =
+        #   case ExMarcel.MimeType.for {:path, path} do
+        #     "video/mp4" -> ".m4a"
+        #     "audio/mp3" -> ".mp3"
+        #     _           -> ""
+        #   end
+        # dest = Path.join([:code.priv_dir(:stream_handler), "static", "uploads", Path.basename(path)])
+        # FIXME use ExMarcel to detect MIME type
+        dest = Path.join(["./files/uploads", Path.basename(path)])
+        File.cp!(path, dest)
+        {:ok, "./files/uploads/#{Path.basename(dest)}"}
+      end)
+
+    # Files now ready to be transcribed.
+    Enum.map(uploaded_files, fn file ->
+      idx = Enum.find_index(uploaded_files, fn x -> x == file end)
+      atom =
+        case idx do
+          0 -> :a
+          1 -> :c
+        end
+      GenServer.cast atom, {:ner_pipeline, file, atom}
+    end)
+
+    {:noreply, update(socket, :uploaded_files, &(&1 ++ uploaded_files))}
   end
 
   @impl true
@@ -378,41 +421,6 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     {:noreply,
         socket
         |> stream_insert(:tickers, new_message)}
-  end
-
-  @impl Phoenix.LiveView
-  def handle_event("validate", _params, socket) do
-    {:noreply, socket}
-  end
-
-  @impl Phoenix.LiveView
-  def handle_event("cancel-upload", %{"ref" => ref}, socket) do
-    {:noreply, cancel_upload(socket, :avatar, ref)}
-  end
-
-  @impl Phoenix.LiveView
-  def handle_event("save", _params, socket) do
-    uploaded_files =
-      consume_uploaded_entries(socket, :avatar, fn %{path: path}, _entry ->
-        IO.inspect(Path.extname(path), label: "Path")
-        # Actually might not even need this
-        # ext =
-        #   case ExMarcel.MimeType.for {:path, path} do
-        #     "video/mp4" -> ".m4a"
-        #     "audio/mp3" -> ".mp3"
-        #     _           -> ""
-        #   end
-        # dest = Path.join([:code.priv_dir(:stream_handler), "static", "uploads", Path.basename(path)])
-        # FIXME use ExMarcel to detect MIME type
-        dest = Path.join(["./files/uploads", Path.basename(path)])
-        File.cp!(path, dest)
-        {:ok, ~p"/uploads/#{Path.basename(dest)}"}
-      end)
-
-    # Files now ready to be transcribed.
-    GenServer.cast :a, {:ner_pipeline, Enum.at(uploaded_files, 0)}
-
-    {:noreply, update(socket, :uploaded_files, &(&1 ++ uploaded_files))}
   end
 
   defp error_to_string(:too_large), do: "Too large"

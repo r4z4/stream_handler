@@ -1,18 +1,15 @@
 defmodule StreamHandler.Servers.Message do
-  alias StreamHandler.Repo
   alias StreamHandler.Message
 
-  @time_interval_ms 2000
+  # @time_interval_ms 2000
   @file_path "./files/"
 
-  @impl true
   def start_link() do
     # IO.inspect(state, label: "Starting Message Sup")
     children = Enum.map([:a,:b,:c,:d,:e], &worker_spec/1)
     Supervisor.start_link(children, strategy: :one_for_one)
   end
 
-  @impl true
   def child_spec(_) do
     %{
       id: __MODULE__,

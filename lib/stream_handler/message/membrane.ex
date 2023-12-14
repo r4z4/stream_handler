@@ -1,7 +1,7 @@
 defmodule StreamHandler.Message.Membrane do
   use Membrane.Pipeline
   alias Membrane.FFmpeg.SWResample.Converter
-  alias Membrane.{File, RawAudio}
+  alias Membrane.{RawAudio}
 
   @impl true
   def handle_init(_ctx, mp3_url) do
