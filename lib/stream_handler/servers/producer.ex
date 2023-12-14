@@ -64,18 +64,27 @@ defmodule StreamHandler.Servers.Producer do
   @impl true
   def init(state) do
     IO.inspect state, label: "init"
-    refs_map = %{slugs_ref: nil, activites_ref: nil, aq_ref: nil, emojis: nil, custom_event: nil}
+    refs_map = %{slugs_ref: nil, activities_ref: nil, aq_ref: nil, emojis: nil, custom_event: nil}
     {:ok, refs_map}
   end
 
   defp get_slugs() do
-    {:ok, resp} =
+    # :error or :ok
+    {atom, resp} =
       Finch.build(:get, "https://ciprand.p3p.repl.co/api?len=20&count=10")
         |> Finch.request(StreamHandler.Finch)
 
-    IO.inspect(resp, label: "Resp")
-    {:ok, body} = Jason.decode(resp.body)
-    body
+    if atom == :error do
+      {atom, "Transport Error: #{resp.reason}"}
+    else
+      IO.inspect({atom, resp}, label: "Atom/Resp Tuple")
+      {atom, body} =
+        case resp.status do
+          200 -> Jason.decode(resp.body)
+          _   -> {:error, "Error: Status #{resp.status}"}
+        end
+      {atom, body}
+    end
   end
 
   defp get_activities() do
@@ -144,15 +153,18 @@ defmodule StreamHandler.Servers.Producer do
     body = get_slugs()
     IO.inspect(body, label: "Body")
     display =
-      case Map.fetch(body, "Strings") do
-        {:ok, strings} -> strings
-        :error -> ["No List"]
+      if Kernel.elem(body, 0) == :error do ["API Error"]
+      else
+        case Map.fetch(body, "Strings") do
+          {:ok, strings} -> strings
+          :error -> ["No List"]
+        end
       end
     # http://apilayer.net/api/live?access_key=#{System.fetch_env!("FOREX_API_KEY")}&currencies=EUR,GBP,CAD,PLN&source=USD&format=1
     Phoenix.PubSub.broadcast(
       StreamHandler.PubSub,
       @slugs,
-      %{topic: @slugs, payload: %{status: :complete, data: display, text: "Slugs has completed. #{display}"}}
+      %{topic: @slugs, payload: %{status: :complete, data: display, text: "Slugs has completed"}}
     )
     state = Map.put(state, :slugs_ref, slugs_ref)
     {:noreply, state}

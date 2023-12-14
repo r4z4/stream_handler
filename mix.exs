@@ -54,7 +54,10 @@ defmodule StreamHandler.MixProject do
       {:websockex, "~> 0.4.3"},
       {:logger_file_backend, "~> 0.0.10"},
       {:stream_data, "~> 0.5"},
-      {:contex, "~> 0.5.0"}
+      {:contex, "~> 0.5.0"},
+      {:sentry, "~> 8.0"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:hackney, "~> 1.20"}
     ]
   end
 

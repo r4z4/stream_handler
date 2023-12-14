@@ -99,6 +99,47 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   #   |> assign(:stream, nil)
   # end
 
+  def toggle_websocket_services(int) do
+    case int do
+      4 ->
+        IO.puts "WebSockex Casted"
+        # Use start and not start_link to avoid being alerted when we close conn
+        StreamHandler.Servers.Websocket.start(:hey)
+      13 ->
+        IO.puts "WebSockex Stopped"
+        WebSockex.cast :kraken, {:stop_resource, :ws}
+    end
+  end
+  def toggle_all_services(int) do
+    case int do
+      5 ->
+        IO.puts "Casting All Services"
+        # GenServers
+        GenServer.cast :reader,     {:fetch_resource, :reader}
+        GenServer.cast :reader,     {:fetch_resource, :images}
+        GenServer.cast :reader,     {:fetch_resource, :ets}
+        GenServer.cast :streamer,   {:fetch_resource, :streamer}
+        GenServer.cast :consumer_2, {:fetch_resource, :emojis}
+        GenServer.cast :consumer_1, {:fetch_resource, :slugs}
+        GenServer.cast :consumer_4, {:fetch_resource, :activities}
+        # Websockex
+        StreamHandler.Servers.Websocket.start(:hey)
+      14 ->
+        IO.puts "Stopping All Services"
+        # GenServers
+        GenServer.cast :reader,     {:stop_resource, :reader}
+        GenServer.cast :reader,     {:stop_resource, :images}
+        GenServer.cast :reader,     {:stop_resource, :ets}
+        GenServer.cast :streamer,   {:stop_resource, :streamer}
+        GenServer.cast :consumer_2, {:stop_resource, :emojis}
+        GenServer.cast :consumer_1, {:stop_resource, :slugs}
+        GenServer.cast :consumer_4, {:stop_resource, :activities}
+        # Websockex
+        WebSockex.cast :kraken, {:stop_resource, :ws}
+      _ -> IO.puts "Argument Error to toggle_all_services"
+    end
+  end
+
   @impl true
   def handle_event("service_casted", params, socket) do
     # FIXME
@@ -120,92 +161,15 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         _   -> Map.put(clicked_map, map_int, !clicked_map[map_int])
       end
     IO.inspect(adjusted_map, label: "Adjusted ____________ Map")
-    case params["id"] do
+    case Kernel.elem(Integer.parse(params["id"]), 0) do
       # Num + 9 is the Key for Stopping Service (for now)
-      "1" ->
-        IO.puts "Slugs Casted"
-        # StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic_4, "test_message", [])
-        GenServer.cast :consumer_1, {:fetch_resource, :slugs}
-      "10" ->
-        IO.puts "Service #1 (Slugs) Stopped"
-        # StreamHandlerWeb.Endpoint.broadcast_from(self(), @topic_4, "test_message", [])
-        GenServer.cast :consumer_1, {:stop_resource, :slugs}
-
-      "2" ->
-        IO.puts "Emojis Casted"
-        GenServer.cast :consumer_2, {:fetch_resource, :emojis}
-      "11" ->
-        IO.puts "Emojis Stopped"
-        GenServer.cast :consumer_2, {:stop_resource, :emojis}
-
-      "3" ->
-        IO.puts "Activities Casted"
-        GenServer.cast :consumer_4, {:fetch_resource, :activities}
-      "12" ->
-        IO.puts "Activities Stopped"
-        GenServer.cast :consumer_4, {:stop_resource, :activities}
-
-      "4" ->
-        IO.puts "WebSockex Casted"
-        # Use start and not start_link to avoid being alerted when we close conn
-        StreamHandler.Servers.Websocket.start(:hey)
-      "13" ->
-        IO.puts "WebSockex Stopped"
-        WebSockex.cast :kraken, {:stop_resource, :ws}
-
-      "5" ->
-        IO.puts "Casting All Services"
-        # GenServers
-        GenServer.cast :reader,     {:fetch_resource, :reader}
-        GenServer.cast :reader,     {:fetch_resource, :images}
-        GenServer.cast :reader,     {:fetch_resource, :ets}
-        GenServer.cast :streamer,   {:fetch_resource, :streamer}
-        GenServer.cast :consumer_2, {:fetch_resource, :emojis}
-        GenServer.cast :consumer_1, {:fetch_resource, :slugs}
-        GenServer.cast :consumer_4, {:fetch_resource, :activities}
-        # Websockex
-        StreamHandler.Servers.Websocket.start(:hey)
-      "14" ->
-        IO.puts "Stopping All Services"
-        # GenServers
-        GenServer.cast :reader,     {:stop_resource, :reader}
-        GenServer.cast :reader,     {:stop_resource, :images}
-        GenServer.cast :reader,     {:stop_resource, :ets}
-        GenServer.cast :streamer,   {:stop_resource, :streamer}
-        GenServer.cast :consumer_2, {:stop_resource, :emojis}
-        GenServer.cast :consumer_1, {:stop_resource, :slugs}
-        GenServer.cast :consumer_4, {:stop_resource, :activities}
-        # Websockex
-        WebSockex.cast :kraken, {:stop_resource, :ws}
-
-      "6" ->
-        IO.puts "Leaderboard Casted"
-        GenServer.cast :reader, {:fetch_resource, :ets}
-      "15" ->
-        IO.puts "Leaderboard Stopped"
-        GenServer.cast :reader, {:stop_resource, :ets}
-
-      "7" ->
-        IO.puts "Streamer Casted"
-        GenServer.cast :streamer, {:fetch_resource, :streamer}
-      "16" ->
-        IO.puts "Streamer Stopped"
-        GenServer.cast :streamer, {:stop_resource, :streamer}
-
-      "8" ->
-        IO.puts "Reader Casted"
-        GenServer.cast :reader, {:fetch_resource, :reader}
-      "17" ->
-        IO.puts "Stopping Reader"
-        GenServer.cast :reader, {:stop_resource, :reader}
-
-      "9" ->
-        IO.puts "Images Casted"
-        GenServer.cast :reader, {:fetch_resource, :images}
-      "18" ->
-        IO.puts "Images Stopped"
-        GenServer.cast :reader, {:stop_resource, :images}
-
+      i when i in [1,10,2,11,3,12,6,15,7,16,8,17,9,18] ->
+        IO.puts "#{params["castto"]} is handling #{params["op"]} -> #{params["res"]}"
+        GenServer.cast String.to_existing_atom(params["castto"]), {String.to_existing_atom(params["op"]), String.to_existing_atom(params["res"])}
+      i when i in [5,14] ->
+        toggle_all_services(i)
+      i when i in [4,13] ->
+        toggle_websocket_services(i)
       _ ->
         IO.puts "No Service Casted"
     end
