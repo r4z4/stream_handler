@@ -1,5 +1,6 @@
 defmodule StreamHandlerWeb.DashboardComponents do
   use Phoenix.Component
+  alias StreamHandlerWeb.CoreComponents
   # alias Phoenix.LiveView.JS
 
   @spec unicode_display([binary()]) :: binary()
@@ -145,6 +146,27 @@ defmodule StreamHandlerWeb.DashboardComponents do
       <div class="justify-self-start"><h4>Streamer</h4></div>
       <div class="justify-self-end"><span class="text-xs"><%= if @streamer_svg do %>🟢<% else %>🔴<% end %></span></div>
         <%= if @streamer_svg do %><%= @streamer_svg %><% end %>
+    </div>
+    """
+  end
+
+  def bb_card(assigns) do
+    ~H"""
+    <div class="relative flex">
+      <div class="justify-self-start"><h4>Model Responses</h4></div>
+      <div class="justify-self-end"><span class="text-xs"><%= if @bb_data do %><CoreComponents.icon name="hero-check-circle-solid" class="h-5 w-5" /><% else %><CoreComponents.icon name="hero-minus-circle-solid" class="h-5 w-5" /><% end %></span></div>
+      <div>
+        <h4>Transcription</h4>
+          <%= if @bb_text do %><%= @bb_text %><% end %>
+        <h4>Entities</h4>
+          <ul>
+            <%= if @bb_data && Enum.count(@bb_data) > 0 do %>
+              <%= for entity <- @bb_data do %>
+                <li>Entity: <%= entity.entity %> || Type: <%= entity.label %> (<%= Kernel.trunc(entity.score * 100) %>)</li>
+              <% end %>
+            <% end %>
+          </ul>
+        </div>
     </div>
     """
   end

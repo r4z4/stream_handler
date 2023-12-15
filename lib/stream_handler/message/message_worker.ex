@@ -1,7 +1,7 @@
 defmodule StreamHandler.Message.MessageWorker do
   use GenServer
 
-  def start_link({file_path, worker_id}) do
+  def start_link({_file_path, worker_id}) do
     worker_goal = get_worker_goal(worker_id)
     IO.puts "Starting Message Worker for ID: #{worker_id}. #{worker_goal}"
     state = []
@@ -111,6 +111,14 @@ defmodule StreamHandler.Message.MessageWorker do
   #   {:noreply, socket}
   # end
 
+  def broadcast(topic, data) do
+    Phoenix.PubSub.broadcast(
+      StreamHandler.PubSub,
+      topic,
+      %{topic: topic, payload: %{status: :complete, data: data, text: "#{topic} - Service Completed"}}
+    )
+  end
+
   @impl true
   def handle_info({ref, result}, state) when ref in [state.transcribe_ref_a, state.transcribe_ref_c] do
     IO.inspect(ref, label: "Transcribe Ref")
@@ -119,6 +127,7 @@ defmodule StreamHandler.Message.MessageWorker do
     text = chunk_list |> Enum.map_join(& &1.text) |> String.trim()
     # %{chunks: [%{text: text, start_timestamp_seconds: _, end_timestamp_seconds: _}]} = result
     IO.inspect(text, label: "Bumblebee Text")
+    broadcast("bb_text", text)
     File.write("./files/audio_output.txt", text)
     if ref == state.transcribe_ref_a do
       GenServer.cast :b, {:ner, text, :a}
@@ -139,9 +148,10 @@ defmodule StreamHandler.Message.MessageWorker do
     case entity_list do
       [] -> IO.puts "No Entities"
       _  ->
-        for %{label: label, start: _start, end: _end, phrase: phrase, score: score} <- entity_list do
-          prediction = %{label: label, entity: phrase, score: score}
-          IO.puts "It predicted a #{prediction.label} of #{prediction.entity}"
+        pred_list = Enum.map(entity_list, fn item -> %{label: item.label, entity: item.phrase, score: item.score} end)
+        broadcast("bb_data", pred_list)
+        for pred <- pred_list do
+          IO.puts "It predicted a #{pred.label} of #{pred.entity}"
           # Broadcast message to send to ____
         end
     end

@@ -41,40 +41,49 @@
 
   </div>
 
-  <form id="upload-form" phx-submit="save" phx-change="validate">
-    <.live_file_input upload={@uploads.avatar} />
-    <button type="submit">Upload</button>
-  </form>
+  <div class="grid grid-cols-2 gap-2 w-full place-items-stretch">
+  <div>
+    <form id="upload-form" phx-submit="save" phx-change="validate">
+      <.live_file_input upload={@uploads.avatar} />
+      <button class="px-2 py-1 text-base font-medium leading-6 text-gray-500 whitespace-no-wrap bg-white border-2 border-black rounded-full shadow-sm hover:bg-transparent hover:text-white hover:border-purple focus:outline-none mt-2" type="submit">Upload</button>
+    </form>
 
-  <section phx-drop-target={@uploads.avatar.ref}>
+    <section phx-drop-target={@uploads.avatar.ref}>
+      <%!-- render each avatar entry --%>
+      <%= for entry <- @uploads.avatar.entries do %>
+        <article class="upload-entry">
 
-<%!-- render each avatar entry --%>
-<%= for entry <- @uploads.avatar.entries do %>
-  <article class="upload-entry">
+          <figure>
+            <%= if (String.split(entry.client_name, ".") |> Enum.at(1)) in ["m4a", "mp3"] do %>
+              <.icon name="hero-musical-note-solid" class="h-5 w-5" />
+            <% else %>
+              <.live_img_preview entry={entry} />
+            <% end %>
+            <figcaption><%= entry.client_name %></figcaption>
+          </figure>
 
-    <figure>
-      <.live_img_preview entry={entry} />
-      <figcaption><%= entry.client_name %></figcaption>
-    </figure>
+          <%!-- entry.progress will update automatically for in-flight entries --%>
+          <progress value={entry.progress} max="100"> <%= entry.progress %>% </progress>
 
-    <%!-- entry.progress will update automatically for in-flight entries --%>
-    <progress value={entry.progress} max="100"> <%= entry.progress %>% </progress>
+          <%!-- a regular click event whose handler will invoke Phoenix.LiveView.cancel_upload/3 --%>
+          <button type="button" phx-click="cancel-upload" phx-value-ref={entry.ref} aria-label="cancel">&times;</button>
 
-    <%!-- a regular click event whose handler will invoke Phoenix.LiveView.cancel_upload/3 --%>
-    <button type="button" phx-click="cancel-upload" phx-value-ref={entry.ref} aria-label="cancel">&times;</button>
+          <%!-- Phoenix.Component.upload_errors/2 returns a list of error atoms --%>
+          <%= for err <- upload_errors(@uploads.avatar, entry) do %>
+            <p class="alert alert-danger"><%= error_to_string(err) %></p>
+          <% end %>
 
-    <%!-- Phoenix.Component.upload_errors/2 returns a list of error atoms --%>
-    <%= for err <- upload_errors(@uploads.avatar, entry) do %>
-      <p class="alert alert-danger"><%= error_to_string(err) %></p>
-    <% end %>
+        </article>
+      <% end %>
 
-  </article>
-<% end %>
-
-<%!-- Phoenix.Component.upload_errors/1 returns a list of error atoms --%>
-<%= for err <- upload_errors(@uploads.avatar) do %>
-  <p class="alert alert-danger"><%= error_to_string(err) %></p>
-<% end %>
-
-</section>
+      <%!-- Phoenix.Component.upload_errors/1 returns a list of error atoms --%>
+      <%= for err <- upload_errors(@uploads.avatar) do %>
+        <p class="alert alert-danger"><%= error_to_string(err) %></p>
+      <% end %>
+    </section>
+  </div>
+  <div class="border-l-4">
+    <StreamHandlerWeb.DashboardComponents.bb_card bb_text={@bb_text} bb_data={@bb_data} />
+  </div>
+</div>
 

@@ -47,6 +47,9 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     StreamHandlerWeb.Endpoint.subscribe(@ets)
     StreamHandlerWeb.Endpoint.subscribe("websocket")
 
+    StreamHandlerWeb.Endpoint.subscribe("bb_data")
+    StreamHandlerWeb.Endpoint.subscribe("bb_text")
+
     StreamHandlerWeb.Endpoint.subscribe(@aq)
     StreamHandlerWeb.Endpoint.subscribe(@activities)
     StreamHandlerWeb.Endpoint.subscribe(@topic_3)
@@ -68,6 +71,8 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       |> stream(:spreads, [])
       # |> stream(:tickers, [])
       |> assign(:message, '')
+      |> assign(:bb_text, nil)
+      |> assign(:bb_data, nil)
 
       |> assign(:text, "Start")
       |> assign(:number, 0)
@@ -344,6 +349,24 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     {:noreply,
       socket
       |> assign(:images, msg)
+    }
+  end
+
+  @impl true
+  def handle_info(%{topic: "bb_text", payload: msg}, socket) do
+    IO.puts "Handle Broadcast for BB Text"
+    {:noreply,
+      socket
+      |> assign(:bb_text, msg[:data])
+    }
+  end
+
+  @impl true
+  def handle_info(%{topic: "bb_data", payload: msg}, socket) do
+    IO.puts "Handle Broadcast for BB Data"
+    {:noreply,
+      socket
+      |> assign(:bb_data, msg[:data])
     }
   end
 
