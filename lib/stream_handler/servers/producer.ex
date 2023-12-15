@@ -33,6 +33,7 @@ defmodule StreamHandler.Servers.Producer do
   @impl true
   def handle_cast({:stop_resource, sym}, state) do
     IO.puts "Cancelling #{sym} Service"
+    IO.inspect(state.slugs_ref, label: "Ref at Cancel")
     case sym do
       :aq -> Process.cancel_timer(state.reader_ref)
       :slugs -> Process.cancel_timer(state.slugs_ref)
@@ -75,13 +76,13 @@ defmodule StreamHandler.Servers.Producer do
         |> Finch.request(StreamHandler.Finch)
 
     if atom == :error do
-      {atom, "Transport Error: #{resp.reason}"}
+      {atom, %{"Strings" => ["Transport Error: #{resp.reason}"]}}
     else
       IO.inspect({atom, resp}, label: "Atom/Resp Tuple")
       {atom, body} =
         case resp.status do
           200 -> Jason.decode(resp.body)
-          _   -> {:error, "Error: Status #{resp.status}"}
+          _   -> {:error, %{"Strings" => ["Error: Status #{resp.status}"]}}
         end
       {atom, body}
     end
@@ -149,16 +150,13 @@ defmodule StreamHandler.Servers.Producer do
 
   @impl true
   def handle_info(:slugs, state) do
-    slugs_ref = Process.send_after(self(), :slugs, @call_interval_ms)
-    body = get_slugs()
+    IO.inspect(state.slugs_ref, label: "Slug Ref Calling get_slugs()")
+    {_atom, body} = get_slugs()
     IO.inspect(body, label: "Body")
     display =
-      if Kernel.elem(body, 0) == :error do ["API Error"]
-      else
-        case Map.fetch(body, "Strings") do
-          {:ok, strings} -> strings
-          :error -> ["No List"]
-        end
+      case Map.fetch(body, "Strings") do
+        {:ok, strings} -> strings
+        :error -> ["No List"]
       end
     # http://apilayer.net/api/live?access_key=#{System.fetch_env!("FOREX_API_KEY")}&currencies=EUR,GBP,CAD,PLN&source=USD&format=1
     Phoenix.PubSub.broadcast(
@@ -166,6 +164,8 @@ defmodule StreamHandler.Servers.Producer do
       @slugs,
       %{topic: @slugs, payload: %{status: :complete, data: display, text: "Slugs has completed"}}
     )
+    slugs_ref = Process.send_after(self(), :slugs, @call_interval_ms)
+    IO.inspect(slugs_ref, label: "New Slugs Ref")
     state = Map.put(state, :slugs_ref, slugs_ref)
     {:noreply, state}
   end
