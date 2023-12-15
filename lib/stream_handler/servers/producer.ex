@@ -33,6 +33,7 @@ defmodule StreamHandler.Servers.Producer do
   @impl true
   def handle_cast({:stop_resource, sym}, state) do
     IO.puts "Cancelling #{sym} Service"
+    IO.inspect(state.slugs_ref, label: "Ref at Cancel")
     case sym do
       :aq -> Process.cancel_timer(state.reader_ref)
       :slugs -> Process.cancel_timer(state.slugs_ref)
@@ -64,18 +65,27 @@ defmodule StreamHandler.Servers.Producer do
   @impl true
   def init(state) do
     IO.inspect state, label: "init"
-    refs_map = %{slugs_ref: nil, activites_ref: nil, aq_ref: nil, emojis: nil, custom_event: nil}
+    refs_map = %{slugs_ref: nil, activities_ref: nil, aq_ref: nil, emojis: nil, custom_event: nil}
     {:ok, refs_map}
   end
 
   defp get_slugs() do
-    {:ok, resp} =
+    # :error or :ok
+    {atom, resp} =
       Finch.build(:get, "https://ciprand.p3p.repl.co/api?len=20&count=10")
         |> Finch.request(StreamHandler.Finch)
 
-    IO.inspect(resp, label: "Resp")
-    {:ok, body} = Jason.decode(resp.body)
-    body
+    if atom == :error do
+      {atom, %{"Strings" => ["Transport Error: #{resp.reason}"]}}
+    else
+      IO.inspect({atom, resp}, label: "Atom/Resp Tuple")
+      {atom, body} =
+        case resp.status do
+          200 -> Jason.decode(resp.body)
+          _   -> {:error, %{"Strings" => ["Error: Status #{resp.status}"]}}
+        end
+      {atom, body}
+    end
   end
 
   defp get_activities() do
@@ -140,8 +150,8 @@ defmodule StreamHandler.Servers.Producer do
 
   @impl true
   def handle_info(:slugs, state) do
-    slugs_ref = Process.send_after(self(), :slugs, @call_interval_ms)
-    body = get_slugs()
+    IO.inspect(state.slugs_ref, label: "Slug Ref Calling get_slugs()")
+    {_atom, body} = get_slugs()
     IO.inspect(body, label: "Body")
     display =
       case Map.fetch(body, "Strings") do
@@ -152,8 +162,10 @@ defmodule StreamHandler.Servers.Producer do
     Phoenix.PubSub.broadcast(
       StreamHandler.PubSub,
       @slugs,
-      %{topic: @slugs, payload: %{status: :complete, data: display, text: "Slugs has completed. #{display}"}}
+      %{topic: @slugs, payload: %{status: :complete, data: display, text: "Slugs has completed"}}
     )
+    slugs_ref = Process.send_after(self(), :slugs, @call_interval_ms)
+    IO.inspect(slugs_ref, label: "New Slugs Ref")
     state = Map.put(state, :slugs_ref, slugs_ref)
     {:noreply, state}
   end

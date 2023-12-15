@@ -64,6 +64,9 @@ defmodule StreamHandler.MixProject do
       {:membrane_ffmpeg_swresample_plugin, "~> 0.19.0"},
       {:membrane_mp3_mad_plugin, "~> 0.18.1"},
       {:ex_marcel, "~> 0.1.0"}
+      {:sentry, "~> 8.0"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:hackney, "~> 1.20"}
     ]
   end
 
