@@ -56,9 +56,10 @@ config :tailwind,
   ]
 
 config :sentry,
-  dsn: System.get_env("SENTRY_DSN"),
+  # dsn: System.get_env("SENTRY_DSN"),
+  dsn: "https://fbd7f1f05135475c95aff5566c16023d@app.glitchtip.com/5330",
   environment_name: Mix.env(),
-  included_environments: [:prod],
+  included_environments: [:prod, :dev],
   enable_source_code_context: true,
   # 8.x
   root_source_code_paths: [File.cwd!()]

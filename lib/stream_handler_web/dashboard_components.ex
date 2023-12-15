@@ -157,12 +157,22 @@ defmodule StreamHandlerWeb.DashboardComponents do
       <div class="justify-self-end"><span class="text-xs"><%= if @bb_data do %><CoreComponents.icon name="hero-check-circle-solid" class="h-5 w-5" /><% else %><CoreComponents.icon name="hero-minus-circle-solid" class="h-5 w-5" /><% end %></span></div>
       <div>
         <h4>Transcription</h4>
-          <%= if @bb_text do %><%= @bb_text %><% end %>
+          <ul>
+            <%= if @bb_text && Enum.count(@bb_text) > 0 do %>
+              <%= for round <- @bb_text do %>
+                - Transcription <%= :erlang.ref_to_list(round.id) |> List.to_string() %>:
+                <li><%= round.data %></li>
+              <% end %>
+            <% end %>
+          </ul>
         <h4>Entities</h4>
           <ul>
             <%= if @bb_data && Enum.count(@bb_data) > 0 do %>
-              <%= for entity <- @bb_data do %>
-                <li>Entity: <%= entity.entity %> || Type: <%= entity.label %> (<%= Kernel.trunc(entity.score * 100) %>)</li>
+              <%= for round <- @bb_data do %>
+                - Prediction <%= :erlang.ref_to_list(round.id) |> List.to_string() %>:
+                <%= for entity <- round.data do %>
+                  <li>Entity: <%= entity.entity %> || Type: <%= entity.label %> (<%= Kernel.trunc(entity.score * 100) %>)</li>
+                <% end %>
               <% end %>
             <% end %>
           </ul>

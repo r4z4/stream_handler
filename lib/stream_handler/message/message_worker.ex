@@ -24,7 +24,7 @@ defmodule StreamHandler.Message.MessageWorker do
   def init(state) do
     # _table = :ets.new(:user_scores, [:ordered_set, :protected, :named_table])
     IO.inspect state, label: "init"
-    refs_map = %{transcribe_ref_a: nil, transcribe_ref_c: nil, transcriptions: [], ner_ref_a: nil, ner_ref_c: nil, ners: [], ner_preds: []}
+    refs_map = %{transcribe_ref_a: nil, transcribe_ref_c: nil, transcribe_ref_d: nil, transcribe_ref_e: nil, transcriptions: [], ner_ref_a: nil, ner_ref_c: nil, ner_ref_d: nil, ner_ref_e: nil, ners: [], ner_preds: []}
     {:ok, refs_map}
   end
 
@@ -48,6 +48,8 @@ defmodule StreamHandler.Message.MessageWorker do
       case server do
         :a -> Map.put(state, :transcribe_ref_a, transcribe_task.ref)
         :c -> Map.put(state, :transcribe_ref_c, transcribe_task.ref)
+        :d -> Map.put(state, :transcribe_ref_d, transcribe_task.ref)
+        :e -> Map.put(state, :transcribe_ref_e, transcribe_task.ref)
         _  -> IO.puts "No Value for Server Atom"
       end
     {:noreply, state}
@@ -60,6 +62,8 @@ defmodule StreamHandler.Message.MessageWorker do
       case server do
         :a -> Map.put(state, :ner_ref_a, task.ref)
         :c -> Map.put(state, :ner_ref_c, task.ref)
+        :d -> Map.put(state, :ner_ref_d, task.ref)
+        :e -> Map.put(state, :ner_ref_e, task.ref)
       end
     {:noreply, state}
   end
@@ -120,26 +124,31 @@ defmodule StreamHandler.Message.MessageWorker do
   end
 
   @impl true
-  def handle_info({ref, result}, state) when ref in [state.transcribe_ref_a, state.transcribe_ref_c] do
+  def handle_info({ref, result}, state) when ref in [state.transcribe_ref_a, state.transcribe_ref_c, state.transcribe_ref_d, state.transcribe_ref_e] do
     IO.inspect(ref, label: "Transcribe Ref")
     Process.demonitor(ref, [:flush])
     %{chunks: chunk_list} = result
     text = chunk_list |> Enum.map_join(& &1.text) |> String.trim()
     # %{chunks: [%{text: text, start_timestamp_seconds: _, end_timestamp_seconds: _}]} = result
     IO.inspect(text, label: "Bumblebee Text")
-    broadcast("bb_text", text)
+    broadcast("bb_text", %{id: ref, data: text})
     File.write("./files/audio_output.txt", text)
-    if ref == state.transcribe_ref_a do
-      GenServer.cast :b, {:ner, text, :a}
-    else
-      GenServer.cast :b, {:ner, text, :c}
+    cond do
+      ref == state.transcribe_ref_a ->
+        GenServer.cast :b, {:ner, text, :a}
+      ref == state.transcribe_ref_c ->
+        GenServer.cast :b, {:ner, text, :c}
+      ref == state.transcribe_ref_d ->
+        GenServer.cast :b, {:ner, text, :d}
+      ref == state.transcribe_ref_e ->
+        GenServer.cast :b, {:ner, text, :e}
     end
     state = Map.put(state, :transcriptions, [text | state.transcriptions])
     {:noreply, state}
   end
 
   @impl true
-  def handle_info({ref, result}, state) when ref in [state.ner_ref_a, state.ner_ref_c] do
+  def handle_info({ref, result}, state) when ref in [state.ner_ref_a, state.ner_ref_c, state.ner_ref_d, state.ner_ref_e] do
     IO.inspect(ref, label: "Ner Ref")
     Process.demonitor(ref, [:flush])
     # Just a single record but it does return a list
@@ -149,7 +158,7 @@ defmodule StreamHandler.Message.MessageWorker do
       [] -> IO.puts "No Entities"
       _  ->
         pred_list = Enum.map(entity_list, fn item -> %{label: item.label, entity: item.phrase, score: item.score} end)
-        broadcast("bb_data", pred_list)
+        broadcast("bb_data", %{id: ref, data: pred_list})
         for pred <- pred_list do
           IO.puts "It predicted a #{pred.label} of #{pred.entity}"
           # Broadcast message to send to ____

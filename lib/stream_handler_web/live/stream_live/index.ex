@@ -71,8 +71,8 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       |> stream(:spreads, [])
       # |> stream(:tickers, [])
       |> assign(:message, '')
-      |> assign(:bb_text, nil)
-      |> assign(:bb_data, nil)
+      |> assign(:bb_text, [])
+      |> assign(:bb_data, [])
 
       |> assign(:text, "Start")
       |> assign(:number, 0)
@@ -230,6 +230,8 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         case idx do
           0 -> :a
           1 -> :c
+          2 -> :d
+          3 -> :e
         end
       GenServer.cast atom, {:ner_pipeline, file, atom}
     end)
@@ -357,7 +359,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     IO.puts "Handle Broadcast for BB Text"
     {:noreply,
       socket
-      |> assign(:bb_text, msg[:data])
+      |> assign(:bb_text, [msg[:data] | socket.assigns.bb_text])
     }
   end
 
@@ -366,7 +368,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     IO.puts "Handle Broadcast for BB Data"
     {:noreply,
       socket
-      |> assign(:bb_data, msg[:data])
+      |> assign(:bb_data, [msg[:data] | socket.assigns.bb_data])
     }
   end
 
