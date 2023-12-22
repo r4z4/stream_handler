@@ -48,6 +48,10 @@ defmodule StreamHandler.Application do
       {Phoenix.PubSub, name: StreamHandler.PubSub},
       # Start Finch
       {Finch, name: StreamHandler.Finch},
+      %{
+        id: StreamHandler.Media.StreamToFile,
+        start: {StreamHandler.Media.StreamToFile, :start_link, ["output"]}
+      },
       # Start the Endpoint (http/https)
       StreamHandlerWeb.Endpoint,
       {Nx.Serving, serving: serving, name: StreamHandler.Serving, batch_timeout: 100},
