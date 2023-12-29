@@ -25,6 +25,8 @@ defmodule StreamHandlerWeb.Router do
 
     live "/stream/:id", StreamLive.Show, :show
     live "/stream/:id/show/edit", StreamLive.Show, :edit
+
+    live "/mail", MailLive.Index, :index
   end
 
   # Other scopes may use custom stacks.
