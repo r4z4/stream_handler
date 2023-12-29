@@ -1,6 +1,9 @@
 <.header>
   <h3 class="text-center text-2xl mb-3">Demo Concurrency Dashboard</h3>
 </.header>
+      <%= if @addrs do %>
+        <div><h2><%= @addrs.text %></h2></div>
+      <% end %>
   <div class="grid grid-cols-3 gap-2 w-full place-items-stretch">
 
     <div class={get_class(@clicked_map, 1)}>

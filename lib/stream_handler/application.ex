@@ -48,10 +48,10 @@ defmodule StreamHandler.Application do
       {Phoenix.PubSub, name: StreamHandler.PubSub},
       # Start Finch
       {Finch, name: StreamHandler.Finch},
-      %{
-        id: StreamHandler.Media.StreamToFile,
-        start: {StreamHandler.Media.StreamToFile, :start_link, ["output"]}
-      },
+      # %{
+      #   id: StreamHandler.Media.StreamToFile,
+      #   start: {StreamHandler.Media.StreamToFile, :start_link, ["output"]}
+      # },
       # Start the Endpoint (http/https)
       StreamHandlerWeb.Endpoint,
       {Nx.Serving, serving: serving, name: StreamHandler.Serving, batch_timeout: 100},
@@ -64,7 +64,8 @@ defmodule StreamHandler.Application do
       Supervisor.child_spec({StreamHandler.Servers.Streamer,  [:streamer, []]}, id: :streamer),
       # Start a worker by calling: StreamHandler.Worker.start_link(arg)
       # {StreamHandler.Worker, arg}
-      Supervisor.child_spec({StreamHandler.Servers.Message, nil}, id: :message_sup)
+      Supervisor.child_spec({StreamHandler.Servers.Message, nil}, id: :message_sup),
+      Supervisor.child_spec({StreamHandler.Servers.MailServer, [:mail_server, []]}, id: :mail_server)
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

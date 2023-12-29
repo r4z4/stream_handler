@@ -16,6 +16,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @reader "reader"
   @streamer "streamer"
   @images "images"
+  @addrs "addrs"
 
   # string() refers to Erlang strings. != Elixir strings.
   @spec get_class(map(), integer()) :: binary()
@@ -50,6 +51,8 @@ defmodule StreamHandlerWeb.StreamLive.Index do
     StreamHandlerWeb.Endpoint.subscribe("bb_data")
     StreamHandlerWeb.Endpoint.subscribe("bb_text")
 
+    StreamHandlerWeb.Endpoint.subscribe(@addrs)
+
     StreamHandlerWeb.Endpoint.subscribe(@aq)
     StreamHandlerWeb.Endpoint.subscribe(@activities)
     StreamHandlerWeb.Endpoint.subscribe(@topic_3)
@@ -66,6 +69,8 @@ defmodule StreamHandlerWeb.StreamLive.Index do
       |> assign(:ets, nil)
       |> assign(:aq, nil)
       |> assign(:streamer_svg, nil)
+
+      |> assign(:addrs, nil)
 
       |> stream(:messages, [])
       |> stream(:spreads, [])
@@ -130,6 +135,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_2, {:fetch_resource, :emojis}
         GenServer.cast :consumer_1, {:fetch_resource, :slugs}
         GenServer.cast :consumer_4, {:fetch_resource, :activities}
+        GenServer.cast :mail_server, {:fetch_resource, :addrs}
         # Websockex
         StreamHandler.Servers.Websocket.start(:hey)
       14 ->
@@ -142,6 +148,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_2, {:stop_resource, :emojis}
         GenServer.cast :consumer_1, {:stop_resource, :slugs}
         GenServer.cast :consumer_4, {:stop_resource, :activities}
+        GenServer.cast :mail_server, {:stop_resource, :addrs}
         # Websockex
         WebSockex.cast :kraken, {:stop_resource, :ws}
       _ -> IO.puts "Argument Error to toggle_all_services"
@@ -277,6 +284,16 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   end
 
   @impl true
+  def handle_info(%{topic: @addrs, payload: msg}, socket) do
+    IO.inspect(socket)
+    IO.puts "Handle Broadcast for Addrs"
+    {:noreply,
+      socket
+      |> assign(:addrs, msg[:data])
+    }
+  end
+
+  @impl true
   def handle_info(%{topic: @emojis, payload: msg}, socket) do
     IO.inspect(socket)
     IO.puts "Handle Broadcast for Emojis"
@@ -384,7 +401,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
             IO.puts "Kraken Heartbeat Map"
             {:noreply, socket}
         _ ->
-            new_message = %{id: List.first(new_message), data: Kernel.elem(List.pop_at(new_message, 1), 0)}
+            new_message = %{id: Enum.count(new_message), data: Kernel.elem(List.pop_at(new_message, 1), 0)}
             IO.inspect(new_message, label: "The New Message!!")
             {:noreply,
                 socket
@@ -395,7 +412,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @impl true
   def handle_info(%{event: "new_spread", payload: new_message}, socket) do
     IO.inspect(new_message, label: "New Spread MEssage")
-    new_message = %{id: List.first(new_message), data: Kernel.elem(List.pop_at(new_message, 1), 0)}
+    new_message = %{id: Enum.count(new_message), data: Kernel.elem(List.pop_at(new_message, 1), 0)}
     {:noreply,
         socket
         |> stream_insert(:spreads, new_message)}
@@ -404,7 +421,7 @@ defmodule StreamHandlerWeb.StreamLive.Index do
   @impl true
   def handle_info(%{event: "new_ticker", payload: new_message}, socket) do
     IO.inspect(new_message, label: "New Ticker MEssage")
-    new_message = %{id: List.first(new_message), data: Kernel.elem(List.pop_at(new_message, 1), 0)}
+    new_message = %{id: Enum.count(new_message), data: Kernel.elem(List.pop_at(new_message, 1), 0)}
     {:noreply,
         socket
         |> stream_insert(:tickers, new_message)}
