@@ -91,5 +91,6 @@
   <div class="border-l-4">
     <StreamHandlerWeb.DashboardComponents.bb_card bb_text={@bb_text} bb_data={@bb_data} />
   </div>
+  <%= live_render(@socket, StreamHandler.MicrophoneLive, id: :microphone_live, session: %{"room_key" => "Hi"}) %>
 </div>
 
