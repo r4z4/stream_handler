@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :stream_handler, StreamHandler.Repo, migration_primary_key: [type: :identity]
+
 config :stream_handler,
   ecto_repos: [StreamHandler.Repo]
 

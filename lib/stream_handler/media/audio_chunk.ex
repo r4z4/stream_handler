@@ -6,6 +6,7 @@ defmodule StreamHandler.Media.AudioChunk do
   alias StreamHandler.Core.Error
   alias __MODULE__
 
+  @primary_key false
   schema "audio_chunk" do
     field :text, :string
     field :start_timestamp_seconds, :float

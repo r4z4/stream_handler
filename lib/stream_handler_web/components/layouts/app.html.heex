@@ -8,20 +8,20 @@
         v<%= Application.spec(:stream_handler, :vsn) %>
       </p>
     </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <a href="/" class="hover:text-zinc-700">
+    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-200">
+      <a href="/" class="hover:text-brand">
         Home
       </a>
       <a
         href="/stream"
-        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
+        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80 text-black"
       >
         Services <span aria-hidden="true">&rarr;</span>
       </a>
     </div>
   </div>
 </header>
-<main class="px-4 py-20 sm:px-6 lg:px-8 bg-slate-500">
+<main class="px-4 py-20 sm:px-6 lg:px-8 bg-slate-700">
   <div class="mx-auto">
     <.flash_group flash={@flash} />
     <%= @inner_content %>

@@ -105,7 +105,7 @@ defmodule StreamHandler.MicrophoneLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="h-screen">
+    <div class="">
       <div id="transcript" phx-update="stream" class="pt-4">
         <div
           :for={{id, segment} <- @streams.segments}
@@ -115,7 +115,7 @@ defmodule StreamHandler.MicrophoneLive do
           <%= segment.text %>
         </div>
       </div>
-      <div class="flex h-screen w-full justify-center items-center">
+      <div class="flex w-full justify-center items-center">
         <form phx-change="noop" phx-submit="noop" class="hidden">
           <.live_file_input upload={@uploads.audio} />
         </form>

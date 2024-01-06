@@ -6,6 +6,7 @@ defmodule StreamHandler.Media.AudioChunkList do
 
   def type, do: :array
 
+  @primary_key false
   schema "audio_chunk_list" do
     embeds_many(:chunks, AudioChunk)
   end

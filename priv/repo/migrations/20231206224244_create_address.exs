@@ -2,8 +2,6 @@ defmodule StreamHandler.Repo.Migrations.CreateAddress do
   use Ecto.Migration
 
   def change do
-    execute "CREATE EXTENSION IF NOT EXISTS citext", ""
-
     create table(:address, primary_key: true) do
       # Adding a custom field here to group in DB. Each round will have an ID. UUID
       add :round_id, :string
