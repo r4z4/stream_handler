@@ -1,5 +1,7 @@
 defmodule StreamHandler.MicrophoneLive do
   use StreamHandlerWeb, :live_view
+  alias StreamHandler.Media.AudioChunk
+  alias StreamHandler.Media.AudioChunkList
 
   @impl true
   def mount(_, _, socket) do
@@ -83,8 +85,12 @@ defmodule StreamHandler.MicrophoneLive do
         max_concurrency: 4,
         timeout: :infinity
       )
-      |> Enum.map(fn {:ok, {ss, %{chunks: [%{text: text, start_timestamp_seconds: _start_ts, end_timestamp_seconds: _stop_ts}]}}} ->
-        func.(ss, text)
+      # |> Enum.map(fn {:ok, {ss, %{chunks: [%{text: text, start_timestamp_seconds: _start_ts, end_timestamp_seconds: _stop_ts}]}}} ->
+      |> Enum.map(fn {:ok, {ss, chunk_obj}} ->
+        audio_chunk_list = AudioChunkList.new_from_obj(chunk_obj)
+        IO.inspect(audio_chunk_list, label: "Audio Chunk List")
+        added_text = Enum.map(audio_chunk_list.chunks, fn chunk -> chunk.text end) |> Enum.join(" ")
+        func.(ss, added_text)
       end)
     end)
   end
@@ -113,7 +119,7 @@ defmodule StreamHandler.MicrophoneLive do
         <form phx-change="noop" phx-submit="noop" class="hidden">
           <.live_file_input upload={@uploads.audio} />
         </form>
-        <div id="mic-element" class="flex h-20 w-20 rounded-full bg-gray-700 p-2" phx-hook="Demo">
+        <div id="mic-element" class="flex h-10 w-10 rounded-full bg-gray-700 p-2" phx-hook="Record">
           <div
             :if={@task}
             class="h-full w-full bg-white rounded-full ring-2 ring-white animate-spin border-4 border-solid border-blue-500 border-t-transparent"
