@@ -69,7 +69,8 @@ defmodule StreamHandler.MixProject do
       {:sentry, "~> 8.0"},
       {:mp3_duration, "~> 0.1.0"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:hackney, "~> 1.20"}
+      {:hackney, "~> 1.20"},
+      {:instructor, "~> 0.0.5"}
     ]
   end
 
