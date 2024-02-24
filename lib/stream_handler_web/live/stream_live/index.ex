@@ -148,7 +148,8 @@ defmodule StreamHandlerWeb.StreamLive.Index do
         GenServer.cast :consumer_2, {:stop_resource, :emojis}
         GenServer.cast :consumer_1, {:stop_resource, :slugs}
         GenServer.cast :consumer_4, {:stop_resource, :activities}
-        GenServer.cast :mail_server, {:stop_resource, :addrs}
+        GenServer.cast :mail_server, {:stop_resource, :addrs
+        }
         # Websockex
         WebSockex.cast :kraken, {:stop_resource, :ws}
       _ -> IO.puts "Argument Error to toggle_all_services"

@@ -12,6 +12,18 @@ config :stream_handler, StreamHandler.Repo, migration_primary_key: [type: :ident
 config :stream_handler,
   ecto_repos: [StreamHandler.Repo]
 
+config :openai,
+  # find it at https://platform.openai.com/account/api-keys
+  api_key: System.get_env("OPENAI_API_KEY"),
+  # optional, use when required by an OpenAI API beta, e.g.:
+  beta: "assistants=v1",
+  # optional, passed to [HTTPoison.Request](https://hexdocs.pm/httpoison/HTTPoison.Request.html) options
+  http_options: [recv_timeout: 30_000]
+
+config :instructor, adapter: Instructor.Adapters.OpenAI
+config :instructor, :openai,
+  api_key: System.get_env("OPENAI_API_KEY")
+
 # Configures the endpoint
 config :stream_handler, StreamHandlerWeb.Endpoint,
   url: [host: "localhost"],
